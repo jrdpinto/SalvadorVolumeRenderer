@@ -3,9 +3,7 @@
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_jp_volumerenderer_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */)
+Java_jp_volumerenderer_MainActivity_stringFromJNI(JNIEnv *env, jobject)
 {
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
