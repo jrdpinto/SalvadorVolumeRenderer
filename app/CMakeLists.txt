@@ -10,6 +10,10 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
+file(GLOB_RECURSE   SOURCE_FILES
+                    src/main/salvador-lib/*.h
+                    src/main/salvador-lib/*.cpp)
+
 add_library( # Sets the name of the library.
              salvador-lib
 
@@ -17,7 +21,8 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/salvador-lib/salvador-lib.cpp )
+             #src/main/salvador-lib/salvador-lib.cpp )
+             ${SOURCE_FILES})
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
