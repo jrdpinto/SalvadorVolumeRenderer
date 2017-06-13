@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity
 
     static
     {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("salvador-lib");
     }
 
     private boolean emulatorDetected()
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Example of a call to a native method
+        // TODO: Remove! Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.editText);
         tv.setText(stringFromJNI());
 
