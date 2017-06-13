@@ -32,8 +32,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // TODO: Remove! Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.editText);
-        tv.setText(SalvadorLib.stringFromJNI());
+        Toast.makeText(this, SalvadorLib.stringFromJNI(), Toast.LENGTH_LONG).show();
 
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
