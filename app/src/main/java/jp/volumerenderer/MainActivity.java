@@ -15,11 +15,6 @@ public class MainActivity extends AppCompatActivity
     private GLSurfaceView glSurfaceView;
     boolean rendererSet = false;
 
-    static
-    {
-        System.loadLibrary("salvador-lib");
-    }
-
     private boolean emulatorDetected()
     {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
@@ -38,7 +33,7 @@ public class MainActivity extends AppCompatActivity
 
         // TODO: Remove! Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.editText);
-        tv.setText(stringFromJNI());
+        tv.setText(SalvadorLib.stringFromJNI());
 
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
@@ -87,10 +82,4 @@ public class MainActivity extends AppCompatActivity
             glSurfaceView.onResume();
         }
     }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
 }
