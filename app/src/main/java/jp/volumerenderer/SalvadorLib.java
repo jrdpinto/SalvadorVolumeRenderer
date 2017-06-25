@@ -12,5 +12,7 @@ public class SalvadorLib
         System.loadLibrary("salvador-lib");
     }
 
-    public native static String stringFromJNI();
+    public native static void initRenderer();
+    public native static void drawFrame();
+    public native static void resizeWindow(int width, int height);
 }
