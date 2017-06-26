@@ -16,7 +16,7 @@ class Logger::impl
     Severity severityFilter_;
 
 public:
-    impl() : severityFilter_(Severity::ERROR)
+    impl() : severityFilter_(Severity::DEBUG)
     {
         // TODO: Determine the current platform before instantiating the appropriate logger.
         // For now, use the android logger.
