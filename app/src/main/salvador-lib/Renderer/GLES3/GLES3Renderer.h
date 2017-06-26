@@ -6,7 +6,7 @@
 #ifndef GRAPHICSAPI_GLES3RENDERER_H
 #define GRAPHICSAPI_GLES3RENDERER_H
 
-#include "GraphicsAPI.h"
+#include "../GraphicsAPI.h"
 #include <memory>
 
 class GLES3Renderer : public GraphicsAPI
