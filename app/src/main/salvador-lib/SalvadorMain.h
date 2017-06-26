@@ -17,14 +17,14 @@ public:
     // Updates the current scene and prompts the renderer to render a single frame
     void runTick();
 
-    // TODO: Remove this function. NOTHING outside of main should have access to the renderer!
-    const std::shared_ptr<Renderer> getRenderer();
+    // Resize window and update GUI/scene elements if required
+    void resizeWindow(const int width, const int height);
 
 private:
     SalvadorMain();
     ~SalvadorMain();
 
-    std::shared_ptr<Renderer> renderer_;
+    std::unique_ptr<Renderer> renderer_;
 
     // Override the copy constructor and assignment operator to ensure that they are not
     // called or implemented.

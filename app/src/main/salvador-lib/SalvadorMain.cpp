@@ -29,13 +29,8 @@ void SalvadorMain::initialiseRenderer()
     {
         // Instantiate the appropriate graphics API and inject it into the renderer
         auto api = std::static_pointer_cast<GraphicsAPI>(std::make_shared<GLES3Renderer>());
-        renderer_ = std::make_shared<Renderer>(api);
+        renderer_ = std::make_unique<Renderer>(api);
     }
-}
-
-const std::shared_ptr<Renderer> SalvadorMain::getRenderer()
-{
-    return renderer_;
 }
 
 void SalvadorMain::runTick()
@@ -45,4 +40,9 @@ void SalvadorMain::runTick()
     // TODO: Update simulation/scene
 
     renderer_->renderFrame();
+}
+
+void SalvadorMain::resizeWindow(const int width, const int height)
+{
+    renderer_->resizeWindow(width, height);
 }

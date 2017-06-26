@@ -20,7 +20,7 @@ JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_initRenderer(JNIEnv *e
 
 JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_resizeWindow(JNIEnv *env, jobject, jint width, jint height)
 {
-    SalvadorMain::getInstance()->getRenderer()->resizeWindow(width, height);
+    SalvadorMain::getInstance()->resizeWindow(width, height);
 }
 
 JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_drawFrame(JNIEnv *env, jobject)
