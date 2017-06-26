@@ -5,7 +5,7 @@
 #ifndef SALVADOR_MAIN_H
 #define SALVADOR_MAIN_H
 
-#include "Renderer.h"
+#include "Renderer/Renderer.h"
 
 class SalvadorMain
 {

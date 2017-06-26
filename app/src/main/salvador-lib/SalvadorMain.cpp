@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "GraphicsAPI.h"
-#include "GLES3Renderer.h"
+#include "Renderer/GraphicsAPI.h"
+#include "Renderer/GLES3/GLES3Renderer.h"
 #include "Logger/Logger.h"
 #include "SalvadorMain.h"
 
