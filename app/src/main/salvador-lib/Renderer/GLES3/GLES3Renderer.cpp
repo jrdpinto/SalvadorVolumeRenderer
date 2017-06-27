@@ -2,17 +2,33 @@
 // Created by jp on 13/06/2017.
 //
 
-#include "GLES3Renderer.h"
-#include <GLES3/gl3.h>
 #include <EGL/egl.h>
+#include <GLES3/gl3.h>
+#include <string>
+
+#include "GLES3Renderer.h"
+#include "../../Logger/Logger.h"
 
 class GLES3Renderer::impl
 {
     const EGLContext eglContext_;
+    const std::string TAG = "GLES3Renderer";
 
 public:
     impl() : eglContext_(eglGetCurrentContext())
     {
+        if (eglContext_ != NULL)
+        {
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" OpenGL ES environment info.");
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Version: "+std::string((const char*) glGetString(GL_VERSION)));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Vendor: "+std::string((const char*) glGetString(GL_VENDOR)));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Renderer: "+std::string((const char*) glGetString(GL_RENDERER)));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Extensions: "+std::string((const char*) glGetString(GL_EXTENSIONS)));
+        }
+        else
+        {
+            Logger::getInstance()->log(Logger::Severity::ERROR, TAG+" Could not obtain handle to EGL context!");
+        }
     }
 
     ~impl()
