@@ -31,7 +31,6 @@ void SalvadorMain::initialiseRenderer()
         // Instantiate the appropriate graphics API and inject it into the renderer
         auto api = std::static_pointer_cast<GraphicsAPI>(std::make_shared<GLES3Renderer>());
         renderer_ = std::make_unique<Renderer>(api);
-        Logger::getInstance()->log(Logger::Severity::DEBUG, "GLES3 renderer initialised");
     }
 }
 

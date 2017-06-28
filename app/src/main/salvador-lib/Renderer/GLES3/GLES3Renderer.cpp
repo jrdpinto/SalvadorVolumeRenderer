@@ -19,11 +19,12 @@ public:
     {
         if (eglContext_ != NULL)
         {
+            auto glEnumToString = [](GLenum glEnum) -> std::string {return std::string((const char*) glGetString(glEnum));};
             Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" OpenGL ES environment info.");
-            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Version: "+std::string((const char*) glGetString(GL_VERSION)));
-            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Vendor: "+std::string((const char*) glGetString(GL_VENDOR)));
-            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Renderer: "+std::string((const char*) glGetString(GL_RENDERER)));
-            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Extensions: "+std::string((const char*) glGetString(GL_EXTENSIONS)));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Version: "+glEnumToString(GL_VERSION));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Vendor: "+glEnumToString(GL_VENDOR));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Renderer: "+glEnumToString(GL_RENDERER));
+            Logger::getInstance()->log(Logger::Severity::DEBUG, TAG+" Extensions: "+glEnumToString(GL_EXTENSIONS));
         }
         else
         {
