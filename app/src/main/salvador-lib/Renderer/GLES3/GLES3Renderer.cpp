@@ -45,7 +45,8 @@ public:
         GLint errorCode = glGetError();
         if (errorCode != GL_NO_ERROR)
         {
-            Logger::loge(TAG_+" GL error after "+funcName+" Error#: "+std::to_string(errorCode));
+            Logger::loge(
+                    TAG_ + " GL error after " + funcName + " Error#: " + std::to_string(errorCode));
             error = true;
         }
 
@@ -74,9 +75,11 @@ public:
                 {
                     GLchar infoLog[infoLogLen];
                     glGetShaderInfoLog(shader, infoLogLen, NULL, infoLog);
-                    Logger::loge(TAG_+
-                            " Could not compile "+(shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment")+" shader.");
-                    Logger::loge(TAG_+" Info:\n"+infoLog);
+                    Logger::loge(TAG_ +
+                                 " Could not compile " +
+                                 (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") +
+                                 " shader.");
+                    Logger::loge(TAG_ + " Info:\n" + infoLog);
                 }
 
                 glDeleteShader(shader);
@@ -112,14 +115,14 @@ public:
 
                 if (!linked)
                 {
-                    Logger::loge(TAG_+" Could not link program.");
+                    Logger::loge(TAG_ + " Could not link program.");
                     GLint infoLogLen = 0;
                     glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &infoLogLen);
                     if (infoLogLen)
                     {
                         GLchar infoLog[infoLogLen];
                         glGetProgramInfoLog(programId, infoLogLen, NULL, infoLog);
-                        Logger::loge(TAG_+" Info:\n"+infoLog);
+                        Logger::loge(TAG_ + " Info:\n" + infoLog);
                     }
 
                     glDeleteProgram(programId);
@@ -138,11 +141,11 @@ public:
     void outputEnvInfo()
     {
         auto glEnumToString = [](GLenum glEnum) -> std::string {return std::string((const char*) glGetString(glEnum));};
-        Logger::logd(TAG_+" OpenGL ES environment info.");
-        Logger::logd(TAG_+" Version: "+glEnumToString(GL_VERSION));
-        Logger::logd(TAG_+" Vendor: "+glEnumToString(GL_VENDOR));
-        Logger::logd(TAG_+" Renderer: "+glEnumToString(GL_RENDERER));
-        Logger::logd(TAG_+" Extensions: "+glEnumToString(GL_EXTENSIONS));
+        Logger::logd(TAG_ + " OpenGL ES environment info.");
+        Logger::logd(TAG_ + " Version: " + glEnumToString(GL_VERSION));
+        Logger::logd(TAG_ + " Vendor: " + glEnumToString(GL_VENDOR));
+        Logger::logd(TAG_ + " Renderer: " + glEnumToString(GL_RENDERER));
+        Logger::logd(TAG_ + " Extensions: " + glEnumToString(GL_EXTENSIONS));
     }
 
     impl() : eglContext_(eglGetCurrentContext())
@@ -152,12 +155,12 @@ public:
             outputEnvInfo();
 
             // Load and initialise default shaders
-            Logger::logd(TAG_+" Loading default shaders.");
+            Logger::logd(TAG_ + " Loading default shaders.");
             defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
         }
         else
         {
-            Logger::loge(TAG_+" Could not obtain handle to EGL context!");
+            Logger::loge(TAG_ + " Could not obtain handle to EGL context!");
         }
     }
 

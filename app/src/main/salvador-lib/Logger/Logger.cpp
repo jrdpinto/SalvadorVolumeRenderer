@@ -8,82 +8,78 @@
 #include "LoggerAPI.h"
 #include "AndroidLogger.h"
 
-class Logger::impl
+enum class Severity : char
 {
-    std::unique_ptr<LoggerAPI> api_;
+    VERBOSE = 0,
+    DEBUG = 1,
+    INFO = 2,
+    ERROR = 3
+};
 
-    // Limits the logger to outputting messages of a specified severity or higher.
-    Severity severityFilter_;
-
+class LoggerImpl
+{
 public:
-    impl() : severityFilter_(Severity::DEBUG)
+
+    LoggerImpl() : severityFilter_(Severity::DEBUG)
     {
         // TODO: Determine the current platform before instantiating the appropriate logger.
         // For now, use the android logger.
         api_ = std::make_unique<AndroidLogger>();
     }
 
-    ~impl(){}
+    ~LoggerImpl(){}
 
-    void log(const Logger::Severity s, const std::string& msg)
+    void log(const Severity s, const std::string& msg) const
     {
         if (s >= severityFilter_)
         {
             switch (s)
             {
-                case Logger::Severity::VERBOSE :
+                case Severity::VERBOSE :
                     api_->logv(msg);
                 break;
-                case Logger::Severity::DEBUG :
+                case Severity::DEBUG :
                     api_->logd(msg);
                 break;
-                case Logger::Severity::INFO :
+                case Severity::INFO :
                     api_->logi(msg);
                 break;
-                case Logger::Severity::ERROR :
+                case Severity::ERROR :
                     api_->loge(msg);
                 break;
             }
         }
     }
+
+    static const LoggerImpl* getInstance()
+    {
+        static LoggerImpl logger;
+        return &logger;
+    }
+
+private:
+    std::unique_ptr<LoggerAPI> api_;
+
+    // Limits the logger to outputting messages of a specified severity or higher.
+    Severity severityFilter_;
 };
-
-Logger::Logger()
-{
-    pimpl_ = std::make_unique<impl>();
-}
-
-Logger::~Logger()
-{
-}
-
-void Logger::log(const Logger::Severity s, const std::string& msg) const
-{
-    pimpl_->log(s, msg);
-}
-
-const Logger *Logger::getInstance()
-{
-    static Logger logger;
-    return &logger;
-}
 
 void Logger::logd(const std::string &msg)
 {
-    getInstance()->log(Severity::DEBUG, msg);
+    LoggerImpl::getInstance()->log(Severity::DEBUG, msg);
 }
 
 void Logger::loge(const std::string &msg)
 {
-    getInstance()->log(Severity::ERROR, msg);
+    LoggerImpl::getInstance()->log(Severity::ERROR, msg);
 }
 
 void Logger::logv(const std::string &msg)
 {
-    getInstance()->log(Severity::VERBOSE, msg);
+    LoggerImpl::getInstance()->log(Severity::VERBOSE, msg);
 }
 
 void Logger::logi(const std::string &msg)
 {
-    getInstance()->log(Severity::INFO, msg);
+    LoggerImpl::getInstance()->log(Severity::INFO, msg);
 }
