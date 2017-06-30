@@ -67,3 +67,23 @@ const Logger *Logger::getInstance()
     static Logger logger;
     return &logger;
 }
+
+void Logger::logd(const std::string &msg)
+{
+    getInstance()->log(Severity::DEBUG, msg);
+}
+
+void Logger::loge(const std::string &msg)
+{
+    getInstance()->log(Severity::ERROR, msg);
+}
+
+void Logger::logv(const std::string &msg)
+{
+    getInstance()->log(Severity::VERBOSE, msg);
+}
+
+void Logger::logi(const std::string &msg)
+{
+    getInstance()->log(Severity::INFO, msg);
+}

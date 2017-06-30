@@ -21,6 +21,12 @@ public:
     void log(const Severity s, const std::string& msg) const;
     static const Logger* getInstance();
 
+    // Helper functions that are less verbose than 'getInstance()->log()'
+    static void logd(const std::string& msg);
+    static void loge(const std::string& msg);
+    static void logv(const std::string& msg);
+    static void logi(const std::string& msg);
+
 private:
     Logger();
     ~Logger();
