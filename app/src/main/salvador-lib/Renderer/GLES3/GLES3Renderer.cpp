@@ -16,7 +16,7 @@ static const char defaultVertexShader[] =
         "out vec4 vColour;\n"
         "void main()\n"
         "{\n"
-        "    //TODO: Transform gl_Position into projection space\n"
+        "    //TODO: Transform gl_Position into screen space\n"
         "    gl_Position = pos;\n"
         "    vColour = colour;\n"
         "}\n";
@@ -31,12 +31,70 @@ static const char defaultFragmentShader[] =
         "    outColour = vColour;\n"
         "}\n";
 
+// TODO: Move these primitives into a separate object class
+struct Vertex
+{
+    float pos_[3];
+    unsigned char col_[4];
+    // TODO: Add u,v coordinates
+};
+
+// Quad arranged in triangle strip format.
+const Vertex QUAD[4] = {
+    {{-0.7f,  -0.7f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
+    {{ 0.7f,  -0.7f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
+    {{-0.7f,   0.7f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
+    {{ 0.7f,   0.7f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
+};
+
 class GLES3Renderer::impl
 {
 public:
     const EGLContext eglContext_;
     const std::string TAG_ = "GLES3Renderer";
+
     GLuint defaultProgram_;
+    GLuint vtxPosHandle_;
+    GLuint vtxColHandle_;
+
+    // Holds all active buffers
+    GLuint buffers_[1];
+
+    impl() : eglContext_(eglGetCurrentContext()), vtxColHandle_(-1), vtxPosHandle_(-1)
+    {
+        if (eglContext_ != NULL)
+        {
+            outputEnvInfo();
+
+            // Load and initialise default shaders
+            Logger::logd(TAG_ + " Initialising default shaders.");
+            defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
+            vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
+            vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
+
+            // Initialise vertex buffer(s)
+            glGenBuffers(1, buffers_);
+            glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+            // NOTE: 'usage' is currently 'STATIC' but will need to be 'DYNAMIC' when the renderer
+            // is modified to use dynamically created/clipped quads.
+            glBufferData(GL_ARRAY_BUFFER, sizeof(QUAD), &QUAD[0], GL_STATIC_DRAW);
+        }
+        else
+        {
+            Logger::loge(TAG_ + " Could not obtain handle to EGL context!");
+        }
+    }
+
+    ~impl()
+    {
+        if (eglContext_ == eglGetCurrentContext())
+        {
+            // Free all resources
+            glDeleteProgram(defaultProgram_);
+            Logger::logd(TAG_+" Deleting buffers.");
+            glDeleteBuffers(1, buffers_);
+        }
+    }
 
     bool checkGlError(const char* funcName)
     {
@@ -45,8 +103,7 @@ public:
         GLint errorCode = glGetError();
         if (errorCode != GL_NO_ERROR)
         {
-            Logger::loge(
-                    TAG_ + " GL error after " + funcName + " Error#: " + std::to_string(errorCode));
+            Logger::loge(TAG_ + " GL error after " + funcName + " Error#: " + std::to_string(errorCode));
             error = true;
         }
 
@@ -148,29 +205,23 @@ public:
         Logger::logd(TAG_ + " Extensions: " + glEnumToString(GL_EXTENSIONS));
     }
 
-    impl() : eglContext_(eglGetCurrentContext())
+    void renderFrame()
     {
-        if (eglContext_ != NULL)
-        {
-            outputEnvInfo();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // Load and initialise default shaders
-            Logger::logd(TAG_ + " Loading default shaders.");
-            defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
-        }
-        else
-        {
-            Logger::loge(TAG_ + " Could not obtain handle to EGL context!");
-        }
-    }
+        // TODO: Load the appropriate shader program. Draw the current vertex buffer.
+        glUseProgram(defaultProgram_);
 
-    ~impl()
-    {
-        if (eglContext_ == eglGetCurrentContext())
-        {
-            // Free all compiled programs
-            glDeleteProgram(defaultProgram_);
-        }
+        // Activate the VBO and send data to the shader
+        glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+        glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos_));
+        glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, col_));
+        glEnableVertexAttribArray(vtxPosHandle_);
+        glEnableVertexAttribArray(vtxColHandle_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        // TODO: Does the VBO need to be deactivated?
+        //glBindBuffer(GL_ARRAY_BUFFER,0);
     }
 };
 
@@ -195,8 +246,5 @@ void GLES3Renderer::resizeWindow(const float width, const float height)
 
 void GLES3Renderer::renderFrame()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // TODO: Load the appropriate shader program. Draw the current vertex buffer.
-    glUseProgram(pimpl_->defaultProgram_);
+    pimpl_->renderFrame();
 }
