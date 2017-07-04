@@ -16,7 +16,7 @@ public:
     ~GLES3Renderer();
 
     void clearColour(const float r, const float g, const float b, const float a) override;
-    void resizeWindow(const int width, const int height) override;
+    void resizeWindow(const int width, const int height, const float near, const float far, const float fov) override;
     void renderFrame(const Scene* scene) override;
 
 private:

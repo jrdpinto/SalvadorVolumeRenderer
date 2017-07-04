@@ -45,5 +45,6 @@ void SalvadorMain::runTick()
 
 void SalvadorMain::resizeWindow(const int width, const int height)
 {
-    renderer_->resizeWindow(width, height);
+    auto cam = scene_.getCamera();
+    renderer_->resizeWindow(width, height, cam->near_, cam->far_, cam->fov_);
 }

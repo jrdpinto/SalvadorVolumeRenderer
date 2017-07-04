@@ -15,7 +15,7 @@ public:
     virtual ~GraphicsAPI() {}
 
     virtual void clearColour(const float r, const float g, const float b, const float a) = 0;
-    virtual void resizeWindow(const int width, const int height) = 0;
+    virtual void resizeWindow(const int width, const int height, const float near, const float far, const float fov) = 0;
     virtual void renderFrame(const Scene* scene) = 0;
 };
 

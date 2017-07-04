@@ -16,7 +16,7 @@ public:
     Renderer(std::shared_ptr<GraphicsAPI> api);
     ~Renderer();
 
-    void resizeWindow(const int width, const int height);
+    void resizeWindow(const int width, const int height, const float near, const float far, const float fov);
     void renderFrame(const Scene* scene);
 
 private:

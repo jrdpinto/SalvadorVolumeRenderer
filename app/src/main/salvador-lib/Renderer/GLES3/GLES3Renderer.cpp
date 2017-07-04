@@ -263,12 +263,12 @@ void GLES3Renderer::clearColour(const float r, const float g, const float b, con
     glClearColor(r, g, b, a);
 }
 
-void GLES3Renderer::resizeWindow(const int width, const int height)
+void GLES3Renderer::resizeWindow(const int width, const int height, const float near, const float far, const float fov)
 {
     glViewport(0, 0, width, height);
 
     // Adjust the projection transformation to account for the new screen size
-    mat4x4_perspective(projection_matrix, deg_to_rad(45.0f), (float)width/(float)height, 0.3f, 1000.0f);
+    mat4x4_perspective(projection_matrix, deg_to_rad(fov), (float)width/(float)height, near, far);
 }
 
 void GLES3Renderer::renderFrame(const Scene* scene)
