@@ -18,7 +18,7 @@ void Scene::setCameraPos(const float x, const float y, const float z)
     cam_.pos_ = {x,y,z};
 }
 
-void Scene::setCameraDirection(const float x, const float y, const float z)
+void Scene::setCameraTarget(const float x, const float y, const float z)
 {
     cam_.target_ = {x,y,z};
 }

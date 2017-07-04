@@ -22,6 +22,9 @@ class Scene
         // Projection clipping planes
         float near_ = 0.3f;
         float far_ = 1000.0f;
+
+        // Field of view (degrees)
+        float fov_ = 45.0f;
     };
     Camera cam_;
 
@@ -32,7 +35,7 @@ public:
     ~Scene();
 
     void setCameraPos(const float x, const float y, const float z);
-    void setCameraDirection(const float x, const float y, const float z);
+    void setCameraTarget(const float x, const float y, const float z);
     void setCameraNormal(const float x, const float y, const float z);
     const Camera* getCamera() const;
 };
