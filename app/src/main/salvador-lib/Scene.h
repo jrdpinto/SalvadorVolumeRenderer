@@ -34,6 +34,10 @@ public:
     Scene();
     ~Scene();
 
+    // Update all objects in the scene based on the time that has elapsed since the last frame.
+    // 'elapsedTime' is assumed to be in seconds.
+    void update(float elapsedTime);
+
     void setCameraPos(const float x, const float y, const float z);
     void setCameraTarget(const float x, const float y, const float z);
     void setCameraNormal(const float x, const float y, const float z);

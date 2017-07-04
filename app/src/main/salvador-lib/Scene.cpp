@@ -32,3 +32,9 @@ const Scene::Camera *Scene::getCamera() const
 {
     return &cam_;
 }
+
+void Scene::update(float elapsedTime)
+{
+    // TODO: Replace this action with movement based on touch input
+    cam_.pos_[2] += 0.9f*elapsedTime;
+}

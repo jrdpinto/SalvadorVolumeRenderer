@@ -3,6 +3,7 @@
 //
 
 #include <memory>
+#include <chrono>
 
 #include "Renderer/GraphicsAPI.h"
 #include "Renderer/GLES3/GLES3Renderer.h"
@@ -34,11 +35,21 @@ void SalvadorMain::initialiseRenderer()
     }
 }
 
+std::chrono::duration<float> getElapsedTime()
+{
+    static auto prevTimeStamp = std::chrono::system_clock::now();
+
+    auto currentTimeStamp = std::chrono::system_clock::now();
+    auto elapsedTime = currentTimeStamp-prevTimeStamp;
+    prevTimeStamp = currentTimeStamp;
+
+    return std::chrono::duration_cast< std::chrono::duration<float> >(elapsedTime);
+}
+
 void SalvadorMain::runTick()
 {
-    // TODO: Compute time since last frame
-
-    // TODO: Update simulation/scene
+    // Update simulation/scene
+    scene_.update(getElapsedTime().count());
 
     renderer_->renderFrame(&scene_);
 }
