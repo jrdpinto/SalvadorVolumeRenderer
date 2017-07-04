@@ -6,6 +6,8 @@
 #ifndef GRAPHICSAPI_H
 #define GRAPHICSAPI_H
 
+#include "../Scene.h"
+
 class GraphicsAPI
 {
 public:
@@ -13,8 +15,8 @@ public:
     virtual ~GraphicsAPI() {}
 
     virtual void clearColour(const float r, const float g, const float b, const float a) = 0;
-    virtual void resizeWindow(const float width, const float height) = 0;
-    virtual void renderFrame() = 0;
+    virtual void resizeWindow(const int width, const int height) = 0;
+    virtual void renderFrame(const Scene* scene) = 0;
 };
 
 #endif //GRAPHICSAPI_H

@@ -37,7 +37,7 @@ void Renderer::resizeWindow(const int width, const int height)
     pimpl_->api_->resizeWindow(width, height);
 }
 
-void Renderer::renderFrame()
+void Renderer::renderFrame(const Scene* scene)
 {
-    pimpl_->api_->renderFrame();
+    pimpl_->api_->renderFrame(scene);
 }

@@ -40,7 +40,7 @@ void SalvadorMain::runTick()
 
     // TODO: Update simulation/scene
 
-    renderer_->renderFrame();
+    renderer_->renderFrame(&scene_);
 }
 
 void SalvadorMain::resizeWindow(const int width, const int height)

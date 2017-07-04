@@ -8,16 +8,19 @@
 
 #include "GLES3Renderer.h"
 #include "../../Logger/Logger.h"
+#include "../../external/linmath/linmath.h"
+#include "../../math/MathExtensions.h"
 
 static const char defaultVertexShader[] =
         "#version 300 es\n"
+        "uniform mat4 mvpMat;\n"
         "in vec4 pos;\n"
         "in vec4 colour;\n"
         "out vec4 vColour;\n"
         "void main()\n"
         "{\n"
         "    //TODO: Transform gl_Position into screen space\n"
-        "    gl_Position = pos;\n"
+        "    gl_Position = mvpMat*pos;\n"
         "    vColour = colour;\n"
         "}\n";
 
@@ -47,6 +50,12 @@ const Vertex QUAD[4] = {
     {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
 };
 
+static mat4x4 projection_matrix;
+static mat4x4 view_matrix;
+
+static mat4x4 view_projection_matrix;
+static mat4x4 model_view_projection_matrix;
+
 class GLES3Renderer::impl
 {
 public:
@@ -56,21 +65,30 @@ public:
     GLuint defaultProgram_;
     GLuint vtxPosHandle_;
     GLuint vtxColHandle_;
+    GLuint mVPMatrixHandle_;
 
     // Holds all active buffers
     GLuint buffers_[1];
 
-    impl() : eglContext_(eglGetCurrentContext()), vtxColHandle_(-1), vtxPosHandle_(-1)
+    impl() : eglContext_(eglGetCurrentContext()), vtxColHandle_(-1), vtxPosHandle_(-1), mVPMatrixHandle_(-1)
     {
         if (eglContext_ != NULL)
         {
             outputEnvInfo();
+
+            mat4x4_identity(projection_matrix);
+            mat4x4_identity(view_matrix);
+            mat4x4_identity(view_projection_matrix);
+            mat4x4_identity(model_view_projection_matrix);
+
+            glEnable(GL_DEPTH_TEST);
 
             // Load and initialise default shaders
             Logger::logd(TAG_ + " Initialising default shaders.");
             defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
             vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
+            mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
 
             // Initialise vertex buffer(s)
             glGenBuffers(1, buffers_);
@@ -205,23 +223,29 @@ public:
         Logger::logd(TAG_ + " Extensions: " + glEnumToString(GL_EXTENSIONS));
     }
 
-    void renderFrame()
+    void renderFrame(const Scene* scene)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // TODO: Load the appropriate shader program. Draw the current vertex buffer.
+        // Update the viewing transformation if the camera position has changed
+        auto cam = *scene->getCamera();
+        mat4x4_look_at(view_matrix, cam.pos_, cam.target_, cam.up_);
+        mat4x4_mul(view_projection_matrix, projection_matrix, view_matrix);
+
         glUseProgram(defaultProgram_);
 
         // Activate the VBO and send data to the shader
         glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
         glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos_));
-        glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, col_));
         glEnableVertexAttribArray(vtxPosHandle_);
+        glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, col_));
         glEnableVertexAttribArray(vtxColHandle_);
+        glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *view_projection_matrix);
+
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        // TODO: Does the VBO need to be deactivated?
-        //glBindBuffer(GL_ARRAY_BUFFER,0);
+        // Deactivate the VBO
+        glBindBuffer(GL_ARRAY_BUFFER,0);
     }
 };
 
@@ -239,12 +263,15 @@ void GLES3Renderer::clearColour(const float r, const float g, const float b, con
     glClearColor(r, g, b, a);
 }
 
-void GLES3Renderer::resizeWindow(const float width, const float height)
+void GLES3Renderer::resizeWindow(const int width, const int height)
 {
     glViewport(0, 0, width, height);
+
+    // Adjust the projection transformation to account for the new screen size
+    mat4x4_perspective(projection_matrix, deg_to_rad(45.0f), (float)width/(float)height, 0.3f, 1000.0f);
 }
 
-void GLES3Renderer::renderFrame()
+void GLES3Renderer::renderFrame(const Scene* scene)
 {
-    pimpl_->renderFrame();
+    pimpl_->renderFrame(scene);
 }

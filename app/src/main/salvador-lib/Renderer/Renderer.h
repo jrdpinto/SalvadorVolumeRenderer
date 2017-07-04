@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "GraphicsAPI.h"
+#include "../Scene.h"
 
 class Renderer
 {
@@ -16,7 +17,7 @@ public:
     ~Renderer();
 
     void resizeWindow(const int width, const int height);
-    void renderFrame();
+    void renderFrame(const Scene* scene);
 
 private:
     class impl;

@@ -6,6 +6,7 @@
 #define SALVADOR_MAIN_H
 
 #include "Renderer/Renderer.h"
+#include "Scene.h"
 
 class SalvadorMain
 {
@@ -25,6 +26,7 @@ private:
     ~SalvadorMain();
 
     std::unique_ptr<Renderer> renderer_;
+    Scene scene_;
 
     // Override the copy constructor and assignment operator to ensure that they are not
     // called or implemented.
