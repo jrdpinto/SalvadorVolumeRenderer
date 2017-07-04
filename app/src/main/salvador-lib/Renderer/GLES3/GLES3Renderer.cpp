@@ -229,7 +229,7 @@ public:
 
         // Update the viewing transformation if the camera position has changed
         auto cam = *scene->getCamera();
-        mat4x4_look_at(view_matrix, cam.pos_, cam.target_, cam.up_);
+        mat4x4_look_at(view_matrix, cam.pos_.data(), cam.target_.data(), cam.up_.data());
         mat4x4_mul(view_projection_matrix, projection_matrix, view_matrix);
 
         glUseProgram(defaultProgram_);

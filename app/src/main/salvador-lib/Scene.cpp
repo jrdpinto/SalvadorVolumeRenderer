@@ -15,23 +15,17 @@ Scene::~Scene()
 
 void Scene::setCameraPos(const float x, const float y, const float z)
 {
-    cam_.pos_[0] = x;
-    cam_.pos_[1] = y;
-    cam_.pos_[2] = z;
+    cam_.pos_ = {x,y,z};
 }
 
 void Scene::setCameraDirection(const float x, const float y, const float z)
 {
-    cam_.target_[0] = x;
-    cam_.target_[1] = y;
-    cam_.target_[2] = z;
+    cam_.target_ = {x,y,z};
 }
 
 void Scene::setCameraNormal(const float x, const float y, const float z)
 {
-    cam_.up_[0] = x;
-    cam_.up_[1] = y;
-    cam_.up_[2] = z;
+    cam_.up_ = {x,y,z};
 }
 
 const Scene::Camera *Scene::getCamera() const

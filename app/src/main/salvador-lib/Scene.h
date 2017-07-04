@@ -7,15 +7,17 @@
 #ifndef SALVADOR_SCENE_H
 #define SALVADOR_SCENE_H
 
-#include "external/linmath/linmath.h"
+#include <array>
 
 class Scene
 {
     struct Camera
     {
-        vec3 pos_ = {0.0f, 0.0f, 20.0f};
-        vec3 target_ = {0.0f, 0.0f, 0.0f} ;
-        vec3 up_ = {0.0f, 1.0f, 0.0f};
+        std::array<float, 3> pos_ = {0.0f, 0.0f, 20.0f};
+
+        // Orientation - By default, the camera is upright and points at the origin
+        std::array<float, 3> target_ = {0.0f, 0.0f, 0.0f} ;
+        std::array<float, 3> up_ = {0.0f, 1.0f, 0.0f};
 
         // Projection clipping planes
         float near_ = 0.3f;
