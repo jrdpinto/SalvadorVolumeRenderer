@@ -1,0 +1,3 @@
+[submodule "app/src/main/salvador-lib/external/linmath"]
+	path = app/src/main/salvador-lib/external/linmath
+	url = https://github.com/datenwolf/linmath.h.git
