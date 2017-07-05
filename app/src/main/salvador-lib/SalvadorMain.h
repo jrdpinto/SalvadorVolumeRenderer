@@ -21,6 +21,11 @@ public:
     // Resize window and update GUI/scene elements if required
     void resizeWindow(const int width, const int height);
 
+    // Handle touch event that moves across the screen
+    void handleTouchDrag(float x, float y);
+
+    void handleTouchUp(float x, float y);
+
 private:
     SalvadorMain();
     ~SalvadorMain();

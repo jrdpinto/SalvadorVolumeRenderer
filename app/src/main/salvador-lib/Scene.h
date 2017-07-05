@@ -13,11 +13,21 @@ class Scene
 {
     struct Camera
     {
-        std::array<float, 3> pos_ = {0.0f, 0.0f, 20.0f};
+        enum class State
+        {
+            STATIONARY,
+            MOVING
+        };
+        State state_ = State::STATIONARY;
+
+        std::array<float, 3> pos_ = {0.0f, 0.0f, 10.0f};
 
         // Orientation - By default, the camera is upright and points at the origin
         std::array<float, 3> target_ = {0.0f, 0.0f, 0.0f} ;
         std::array<float, 3> up_ = {0.0f, 1.0f, 0.0f};
+
+        // Rotational speed (camera is currently locked to orbiting around its target)
+        std::array<float, 3> rotationalSpeed_ = {0.0f, 0.0f, 0.0f};
 
         // Projection clipping planes
         float near_ = 0.3f;
@@ -42,6 +52,9 @@ public:
     void setCameraTarget(const float x, const float y, const float z);
     void setCameraNormal(const float x, const float y, const float z);
     const Camera* getCamera() const;
+
+    void handleTouchDrag(float x, float y);
+    void handleTouchUp(float x, float y);
 };
 
 #endif //SALVADOR_SCENE_H

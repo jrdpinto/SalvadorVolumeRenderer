@@ -7,10 +7,14 @@
 
 extern "C"
 {
-    // Renderer events
+    // Rendering events
     JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_initRenderer(JNIEnv *env, jobject);
     JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_resizeWindow(JNIEnv *env, jobject, jint width, jint height);
     JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_drawFrame(JNIEnv *env, jobject);
+
+    // Touch events
+    JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_handleTouchDrag(JNIEnv *env, jobject, jfloat x, jfloat y);
+    JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_handleTouchUp(JNIEnv *env, jobject, jfloat x, jfloat y);
 };
 
 JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_initRenderer(JNIEnv *env, jobject)
@@ -26,4 +30,14 @@ JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_resizeWindow(JNIEnv *e
 JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_drawFrame(JNIEnv *env, jobject)
 {
     SalvadorMain::getInstance()->runTick();
+}
+
+JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_handleTouchDrag(JNIEnv *env, jobject, jfloat x, jfloat y)
+{
+    SalvadorMain::getInstance()->handleTouchDrag(x,y);
+}
+
+void Java_jp_volumerenderer_SalvadorLib_handleTouchUp(JNIEnv *env, jobject, jfloat x, jfloat y)
+{
+    SalvadorMain::getInstance()->handleTouchUp(x,y);
 }

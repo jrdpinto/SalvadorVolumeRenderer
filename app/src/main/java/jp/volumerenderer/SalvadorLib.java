@@ -12,7 +12,12 @@ public class SalvadorLib
         System.loadLibrary("salvador-lib");
     }
 
+    // Rendering events
     public native static void initRenderer();
     public native static void drawFrame();
     public native static void resizeWindow(int width, int height);
+
+    // Touch events
+    public native static void handleTouchDrag(float x, float y);
+    public native static void handleTouchUp(float x, float y);
 }

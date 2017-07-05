@@ -3,6 +3,9 @@
 //
 
 #include "Scene.h"
+#include "Logger/Logger.h"
+
+const std::string TAG_ = "Scene ";
 
 Scene::Scene()
 {
@@ -35,6 +38,28 @@ const Scene::Camera *Scene::getCamera() const
 
 void Scene::update(float elapsedTime)
 {
-    // TODO: Replace this action with movement based on touch input
-    cam_.pos_[2] += 0.9f*elapsedTime;
+    if (cam_.state_ == Camera::State::MOVING)
+    {
+        cam_.pos_[0] += cam_.rotationalSpeed_[1]*elapsedTime;
+    }
+}
+
+void Scene::handleTouchDrag(float x, float y)
+{
+    if (cam_.state_ == Camera::State::STATIONARY)
+    {
+        cam_.state_ = Camera::State::MOVING;
+    }
+
+    //Logger::logd(TAG_+"Drag event X: "+std::to_string(x)+" Y: "+std::to_string(y));
+    cam_.rotationalSpeed_[1] = 80*x;
+}
+
+void Scene::handleTouchUp(float x, float y)
+{
+    if (cam_.state_ == Camera::State::MOVING)
+    {
+        cam_.state_ = Camera::State::STATIONARY;
+        cam_.rotationalSpeed_ = {0,0,0};
+    }
 }

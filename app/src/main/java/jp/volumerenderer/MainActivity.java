@@ -26,10 +26,7 @@ public class MainActivity extends AppCompatActivity
 
         if (configurationInfo.reqGlEsVersion >= 0x30000 )
         {
-            glSurfaceView = new GLSurfaceView(this);
-            glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-            glSurfaceView.setEGLContextClientVersion(3);
-            glSurfaceView.setRenderer(new RendererWrapper());
+            glSurfaceView = new GLESSurface(this);
             setContentView(glSurfaceView);
         }
         else

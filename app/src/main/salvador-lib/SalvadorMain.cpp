@@ -9,6 +9,10 @@
 #include "Renderer/GLES3/GLES3Renderer.h"
 #include "Logger/Logger.h"
 #include "SalvadorMain.h"
+#include "external/linmath/linmath.h"
+
+// Drag vectors with a magnitude lower than this threshold are ignored
+static float TOUCH_EVENT_DRAG_THRESHOLD = 0.01f;
 
 SalvadorMain::SalvadorMain() : renderer_(nullptr)
 {
@@ -58,4 +62,19 @@ void SalvadorMain::resizeWindow(const int width, const int height)
 {
     auto cam = scene_.getCamera();
     renderer_->resizeWindow(width, height, cam->near_, cam->far_, cam->fov_);
+}
+
+void SalvadorMain::handleTouchDrag(float x, float y)
+{
+    auto cancelSmallMovements =
+            [](float component)->float
+            {
+                return abs(component) < TOUCH_EVENT_DRAG_THRESHOLD ? 0.0f : component;
+            };
+    scene_.handleTouchDrag(cancelSmallMovements(x), cancelSmallMovements(y));
+}
+
+void SalvadorMain::handleTouchUp(float x, float y)
+{
+    scene_.handleTouchUp(x,y);
 }
