@@ -6,7 +6,7 @@
 #ifndef GRAPHICSAPI_H
 #define GRAPHICSAPI_H
 
-#include "../Scene.h"
+#include "../Scene/Scene.h"
 
 class GraphicsAPI
 {

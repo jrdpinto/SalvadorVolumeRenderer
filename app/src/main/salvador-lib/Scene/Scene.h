@@ -8,7 +8,7 @@
 #define SALVADOR_SCENE_H
 
 #include <memory>
-#include "external/linmath/linmath.h"
+#include "../external/linmath/linmath.h"
 
 class Scene
 {

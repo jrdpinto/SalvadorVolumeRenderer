@@ -3,9 +3,9 @@
 //
 
 #include "Scene.h"
-#include "Logger/Logger.h"
+#include "../Logger/Logger.h"
 #include <array>
-#include "math/MathExtensions.h"
+#include "../math/MathExtensions.h"
 
 const std::string TAG_ = "Scene ";
 

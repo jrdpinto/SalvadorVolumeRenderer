@@ -6,7 +6,7 @@
 #define SALVADOR_MAIN_H
 
 #include "Renderer/Renderer.h"
-#include "Scene.h"
+#include "Scene/Scene.h"
 
 class SalvadorMain
 {

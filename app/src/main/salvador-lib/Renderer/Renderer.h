@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "GraphicsAPI.h"
-#include "../Scene.h"
+#include "../Scene/Scene.h"
 
 class Renderer
 {
