@@ -60,7 +60,7 @@ void SalvadorMain::runTick()
 
 void SalvadorMain::resizeWindow(const int width, const int height)
 {
-    auto cam = scene_.getCamera();
+    auto cam = scene_.getCameraProjectionParams();
     renderer_->resizeWindow(width, height, cam->near_, cam->far_, cam->fov_);
 }
 

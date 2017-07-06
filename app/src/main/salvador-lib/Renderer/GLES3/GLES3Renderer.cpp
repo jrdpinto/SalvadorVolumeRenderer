@@ -51,7 +51,6 @@ const Vertex QUAD[4] = {
 };
 
 static mat4x4 projection_matrix;
-static mat4x4 view_matrix;
 
 static mat4x4 view_projection_matrix;
 static mat4x4 model_view_projection_matrix;
@@ -77,7 +76,6 @@ public:
             outputEnvInfo();
 
             mat4x4_identity(projection_matrix);
-            mat4x4_identity(view_matrix);
             mat4x4_identity(view_projection_matrix);
             mat4x4_identity(model_view_projection_matrix);
 
@@ -227,10 +225,8 @@ public:
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Update the viewing transformation if the camera position has changed
-        auto cam = *scene->getCamera();
-        mat4x4_look_at(view_matrix, cam.pos_.data(), cam.target_.data(), cam.up_.data());
-        mat4x4_mul(view_projection_matrix, projection_matrix, view_matrix);
+        // TODO: Calculate view-projection only when required
+        mat4x4_mul(view_projection_matrix, projection_matrix, (vec4*) scene->getViewMatrix());
 
         glUseProgram(defaultProgram_);
 

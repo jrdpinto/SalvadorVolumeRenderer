@@ -7,51 +7,40 @@
 #ifndef SALVADOR_SCENE_H
 #define SALVADOR_SCENE_H
 
-#include <array>
+#include <memory>
+#include "external/linmath/linmath.h"
 
 class Scene
 {
-    struct Camera
-    {
-        enum class State
-        {
-            STATIONARY,
-            MOVING
-        };
-        State state_ = State::STATIONARY;
-
-        std::array<float, 3> pos_ = {0.0f, 0.0f, 10.0f};
-
-        // Orientation - By default, the camera is upright and points at the origin
-        std::array<float, 3> target_ = {0.0f, 0.0f, 0.0f} ;
-        std::array<float, 3> up_ = {0.0f, 1.0f, 0.0f};
-
-        // Rotational speed (camera is currently locked to orbiting around its target)
-        std::array<float, 3> rotationalSpeed_ = {0.0f, 0.0f, 0.0f};
-
-        // Projection clipping planes
-        float near_ = 0.3f;
-        float far_ = 1000.0f;
-
-        // Field of view (degrees)
-        float fov_ = 45.0f;
-    };
-    Camera cam_;
-
-    // TODO: Add volume/list of objects here
+    class impl;
+    std::unique_ptr<impl> pimpl_;
 
 public:
+
     Scene();
     ~Scene();
+
+    struct ProjectionParams
+    {
+        // Projection clipping planes
+        float near_ = 0.0f;
+        float far_ = 0.0f;
+
+        // Field of view (degrees)
+        float fov_ = 0.0f;
+    };
 
     // Update all objects in the scene based on the time that has elapsed since the last frame.
     // 'elapsedTime' is assumed to be in seconds.
     void update(float elapsedTime);
 
+    // Camera interface
     void setCameraPos(const float x, const float y, const float z);
     void setCameraTarget(const float x, const float y, const float z);
     void setCameraNormal(const float x, const float y, const float z);
-    const Camera* getCamera() const;
+
+    const ProjectionParams* getCameraProjectionParams() const;
+    const mat4x4* getViewMatrix() const;
 
     void handleTouchDrag(float x, float y);
     void handleTouchUp(float x, float y);
