@@ -50,6 +50,10 @@ public:
     virtual void setPos(float x, float y, float z);
     virtual void setOrientation(float pitch, float yaw, float roll);
 
+    // Input events
+    virtual void handleTouchUp(float x, float y);
+    virtual void handleDragEvent(float x, float y);
+
     const mat4x4* getTransformationMatrix() const;
 };
 
