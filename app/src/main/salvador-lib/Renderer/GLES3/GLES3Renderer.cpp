@@ -226,7 +226,7 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // TODO: Calculate view-projection only when required
-        mat4x4_mul(view_projection_matrix, projection_matrix, (vec4*) scene->getViewMatrix());
+        mat4x4_mul(view_projection_matrix, projection_matrix, (vec4*) scene->getCamera()->getTransformationMatrix());
 
         glUseProgram(defaultProgram_);
 

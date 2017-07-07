@@ -60,8 +60,9 @@ void SalvadorMain::runTick()
 
 void SalvadorMain::resizeWindow(const int width, const int height)
 {
-    auto cam = scene_.getCameraProjectionParams();
-    renderer_->resizeWindow(width, height, cam->near_, cam->far_, cam->fov_);
+    float near, far, fov;
+    scene_.getCamera()->getProjectionParams(near, far, fov);
+    renderer_->resizeWindow(width, height, near, far, fov);
 }
 
 void SalvadorMain::handleTouchDrag(float x, float y)

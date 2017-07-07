@@ -51,7 +51,16 @@ void Object::updateTransformation()
     }
 }
 
-const mat4x4 *Object::getViewMatrix() const
+void Object::reset()
+{
+    vec3 origin = {0.0f, 0.0f, 0.0f};
+    vec3 target = {0.0f, 0.0f, -1.0f};
+    vec3 up = {0.0f, 1.0f, 0.0f};
+    mat4x4_look_at(transformationMatrix_, origin, target, up);
+    transformationUpdateRequired_ = true;
+}
+
+const mat4x4 *Object::getTransformationMatrix() const
 {
     return (mat4x4 const *) &transformationMatrix_;
 }

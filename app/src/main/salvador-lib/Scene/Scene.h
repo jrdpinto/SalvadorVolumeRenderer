@@ -8,6 +8,8 @@
 #define SALVADOR_SCENE_H
 
 #include <memory>
+
+#include "Objects/Camera.h"
 #include "../external/linmath/linmath.h"
 
 class Scene
@@ -20,27 +22,11 @@ public:
     Scene();
     ~Scene();
 
-    struct ProjectionParams
-    {
-        // Projection clipping planes
-        float near_ = 0.0f;
-        float far_ = 0.0f;
-
-        // Field of view (degrees)
-        float fov_ = 0.0f;
-    };
-
     // Update all objects in the scene based on the time that has elapsed since the last frame.
     // 'elapsedTime' is assumed to be in seconds.
     void update(float elapsedTime);
 
-    // Camera interface
-    void setCameraPos(const float x, const float y, const float z);
-    void setCameraTarget(const float x, const float y, const float z);
-    void setCameraNormal(const float x, const float y, const float z);
-
-    const ProjectionParams* getCameraProjectionParams() const;
-    const mat4x4* getViewMatrix() const;
+    const Camera* getCamera() const;
 
     void handleTouchDrag(float x, float y);
     void handleTouchUp(float x, float y);
