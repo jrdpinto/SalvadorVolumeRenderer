@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "Objects/Camera.h"
+#include "Objects/Volume.h"
 #include "../external/linmath/linmath.h"
 
 class Scene
@@ -27,7 +28,12 @@ public:
     void update(float elapsedTime);
 
     const Camera* getCamera() const;
+    const Volume* getVolume() const;
 
+    // TODO: Flesh out this function with volume params/data
+    void addVolume();
+
+    // Touch events
     void handleTouchDrag(float x, float y);
     void handleTouchUp(float x, float y);
 };

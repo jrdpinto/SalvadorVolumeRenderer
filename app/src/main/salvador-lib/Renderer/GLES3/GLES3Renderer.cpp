@@ -10,6 +10,7 @@
 #include "../../Logger/Logger.h"
 #include "../../external/linmath/linmath.h"
 #include "../../math/MathExtensions.h"
+#include "../../Scene/Objects/Volume.h"
 
 static const char defaultVertexShader[] =
         "#version 300 es\n"
@@ -35,23 +36,22 @@ static const char defaultFragmentShader[] =
         "}\n";
 
 // TODO: Move these primitives into a separate object class
-struct Vertex
-{
-    float pos_[3];
-    unsigned char col_[4];
-    // TODO: Add u,v coordinates
-};
-
-// Quad arranged in triangle strip format.
-const Vertex QUAD[4] = {
-    {{-1.0f,  -1.0f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
-    {{ 1.0f,  -1.0f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
-    {{-1.0f,   1.0f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
-    {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
-};
+//struct Vertex
+//{
+//    float pos_[3];
+//    unsigned char col_[4];
+//    // TODO: Add u,v coordinates
+//};
+//
+//// Quad arranged in triangle strip format.
+//const Vertex QUAD[4] = {
+//    {{-1.0f,  -1.0f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
+//    {{ 1.0f,  -1.0f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
+//    {{-1.0f,   1.0f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
+//    {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
+//};
 
 static mat4x4 projection_matrix;
-
 static mat4x4 view_projection_matrix;
 static mat4x4 model_view_projection_matrix;
 
@@ -68,6 +68,9 @@ public:
 
     // Holds all active buffers
     GLuint buffers_[1];
+
+    // Prevents rendering if a buffer has not been created for the current volume
+    bool bufferInitialised = false;
 
     impl() : eglContext_(eglGetCurrentContext()), vtxColHandle_(-1), vtxPosHandle_(-1), mVPMatrixHandle_(-1)
     {
@@ -88,12 +91,7 @@ public:
             vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
 
-            // Initialise vertex buffer(s)
-            glGenBuffers(1, buffers_);
-            glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
-            // NOTE: 'usage' is currently 'STATIC' but will need to be 'DYNAMIC' when the renderer
-            // is modified to use dynamically created/clipped quads.
-            glBufferData(GL_ARRAY_BUFFER, sizeof(QUAD), &QUAD[0], GL_STATIC_DRAW);
+
         }
         else
         {
@@ -221,27 +219,56 @@ public:
         Logger::logd(TAG_ + " Extensions: " + glEnumToString(GL_EXTENSIONS));
     }
 
+    // Initialises all required vertex buffers for objects in the scene
+    void initBuffers(const Scene* scene)
+    {
+        if (!bufferInitialised)
+        {
+            auto vol = scene->getVolume();
+            if (vol != nullptr)
+            {
+                // Initialise vertex buffer(s)
+                glGenBuffers(1, buffers_);
+                glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+                // NOTE: 'usage' is currently 'STATIC' but will need to be 'DYNAMIC' when the renderer
+                // is modified to use dynamically created/clipped quads.
+                auto size = sizeof(Volume::Vertex) * vol->getGeometry()->size();
+                glBufferData(GL_ARRAY_BUFFER, size, &vol->getGeometry()->front(), GL_STATIC_DRAW);
+
+                bufferInitialised = true;
+            }
+        }
+    }
+
     void renderFrame(const Scene* scene)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // TODO: Calculate view-projection only when required
-        mat4x4_mul(view_projection_matrix, projection_matrix, (vec4*) scene->getCamera()->getTransformationMatrix());
+        initBuffers(scene);
 
-        glUseProgram(defaultProgram_);
+        if (bufferInitialised)
+        {
+            // TODO: Calculate view-projection only when required
+            mat4x4_mul(view_projection_matrix, projection_matrix,
+                       (vec4 *) scene->getCamera()->getTransformationMatrix());
 
-        // Activate the VBO and send data to the shader
-        glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
-        glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos_));
-        glEnableVertexAttribArray(vtxPosHandle_);
-        glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, col_));
-        glEnableVertexAttribArray(vtxColHandle_);
-        glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *view_projection_matrix);
+            glUseProgram(defaultProgram_);
 
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            // Activate the VBO and send data to the shader
+            glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+            glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
+                                  (const GLvoid *) offsetof(Volume::Vertex, pos_));
+            glEnableVertexAttribArray(vtxPosHandle_);
+            glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Volume::Vertex),
+                                  (const GLvoid *) offsetof(Volume::Vertex, col_));
+            glEnableVertexAttribArray(vtxColHandle_);
+            glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *view_projection_matrix);
 
-        // Deactivate the VBO
-        glBindBuffer(GL_ARRAY_BUFFER,0);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei) scene->getVolume()->getGeometry()->size());
+
+            // Deactivate the VBO
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
     }
 };
 

@@ -14,8 +14,7 @@ class Scene::impl
 {
 public:
     Camera cam_;
-
-    // TODO: Add volume/list of objects here
+    Volume vol_;
 
     impl()
     {
@@ -71,4 +70,14 @@ void Scene::handleTouchUp(float x, float y)
 const Camera *Scene::getCamera() const
 {
     return &pimpl_->cam_;
+}
+
+void Scene::addVolume()
+{
+
+}
+
+const Volume *Scene::getVolume() const
+{
+    return &pimpl_->vol_;
 }
