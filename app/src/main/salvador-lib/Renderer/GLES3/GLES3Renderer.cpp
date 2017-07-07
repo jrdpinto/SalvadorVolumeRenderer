@@ -35,22 +35,6 @@ static const char defaultFragmentShader[] =
         "    outColour = vColour;\n"
         "}\n";
 
-// TODO: Move these primitives into a separate object class
-//struct Vertex
-//{
-//    float pos_[3];
-//    unsigned char col_[4];
-//    // TODO: Add u,v coordinates
-//};
-//
-//// Quad arranged in triangle strip format.
-//const Vertex QUAD[4] = {
-//    {{-1.0f,  -1.0f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
-//    {{ 1.0f,  -1.0f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
-//    {{-1.0f,   1.0f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
-//    {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
-//};
-
 static mat4x4 projection_matrix;
 static mat4x4 view_projection_matrix;
 static mat4x4 model_view_projection_matrix;
@@ -248,9 +232,12 @@ public:
 
         if (bufferInitialised)
         {
-            // TODO: Calculate view-projection only when required
-            mat4x4_mul(view_projection_matrix, projection_matrix,
-                       (vec4 *) scene->getCamera()->getTransformationMatrix());
+            mat4x4 modelView_matrix;
+            mat4x4_mul(modelView_matrix, (vec4 *) scene->getCamera()->getTransformationMatrix(),
+                                         (vec4 *) scene->getVolume()->getTransformationMatrix());
+
+            mat4x4 modelViewProjection_matrix;
+            mat4x4_mul(modelViewProjection_matrix, projection_matrix, modelView_matrix);
 
             glUseProgram(defaultProgram_);
 
@@ -262,7 +249,7 @@ public:
             glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Volume::Vertex),
                                   (const GLvoid *) offsetof(Volume::Vertex, col_));
             glEnableVertexAttribArray(vtxColHandle_);
-            glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *view_projection_matrix);
+            glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
 
             glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei) scene->getVolume()->getGeometry()->size());
 
