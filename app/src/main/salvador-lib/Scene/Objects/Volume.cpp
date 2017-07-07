@@ -12,13 +12,6 @@ const std::vector<Volume::Vertex> QUAD = {{
     {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
 }};
 
-//const Volume::Vertex QUAD[4] = {
-//    {{-1.0f,  -1.0f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
-//    {{ 1.0f,  -1.0f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
-//    {{-1.0f,   1.0f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
-//    {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
-//};
-
 Volume::Volume()
 {
 }
