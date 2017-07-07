@@ -2,7 +2,6 @@ package jp.volumerenderer;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -41,7 +40,7 @@ public class GLESSurface extends GLSurfaceView
                 this.queueEvent(new Runnable() {
                     @Override
                     public void run() {
-                        SalvadorLib.handleTouchDrag(vectorX, vectorY);
+                        SalvadorLib.handleDragEvent(vectorX, vectorY);
                     }});
 
                 break;

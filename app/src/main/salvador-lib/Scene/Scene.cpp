@@ -29,16 +29,7 @@ public:
     void update(float elapsedTime)
     {
         cam_.update(elapsedTime);
-    }
-
-    void handleTouchDrag(float x, float y)
-    {
-
-    }
-
-    void handleTouchUp(float x, float y)
-    {
-
+        vol_.update(elapsedTime);
     }
 };
 
@@ -57,14 +48,14 @@ void Scene::update(float elapsedTime)
     pimpl_->update(elapsedTime);
 }
 
-void Scene::handleTouchDrag(float x, float y)
+void Scene::handleDragEvent(float x, float y)
 {
-    pimpl_->handleTouchDrag(x,y);
+    pimpl_->vol_.handleDragEvent(x, y);
 }
 
 void Scene::handleTouchUp(float x, float y)
 {
-    pimpl_->handleTouchUp(x,y);
+    pimpl_->vol_.handleTouchUp(x, y);
 }
 
 const Camera *Scene::getCamera() const

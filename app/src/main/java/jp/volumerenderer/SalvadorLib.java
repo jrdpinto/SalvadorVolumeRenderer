@@ -18,6 +18,6 @@ public class SalvadorLib
     public native static void resizeWindow(int width, int height);
 
     // Touch events
-    public native static void handleTouchDrag(float x, float y);
+    public native static void handleDragEvent(float x, float y);
     public native static void handleTouchUp(float x, float y);
 }

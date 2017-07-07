@@ -22,7 +22,7 @@ public:
     void resizeWindow(const int width, const int height);
 
     // Handle touch event that moves across the screen
-    void handleTouchDrag(float x, float y);
+    void handleDragEvent(float x, float y);
 
     void handleTouchUp(float x, float y);
 

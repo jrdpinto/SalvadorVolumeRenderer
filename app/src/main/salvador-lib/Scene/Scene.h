@@ -34,7 +34,7 @@ public:
     void addVolume();
 
     // Touch events
-    void handleTouchDrag(float x, float y);
+    void handleDragEvent(float x, float y);
     void handleTouchUp(float x, float y);
 };
 

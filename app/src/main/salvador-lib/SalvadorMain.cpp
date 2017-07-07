@@ -65,14 +65,14 @@ void SalvadorMain::resizeWindow(const int width, const int height)
     renderer_->resizeWindow(width, height, near, far, fov);
 }
 
-void SalvadorMain::handleTouchDrag(float x, float y)
+void SalvadorMain::handleDragEvent(float x, float y)
 {
     auto cancelSmallMovements =
             [](float component)->float
             {
                 return abs(component) < TOUCH_EVENT_DRAG_THRESHOLD ? 0.0f : component;
             };
-    scene_.handleTouchDrag(cancelSmallMovements(x), cancelSmallMovements(y));
+    scene_.handleDragEvent(cancelSmallMovements(x), cancelSmallMovements(y));
 }
 
 void SalvadorMain::handleTouchUp(float x, float y)

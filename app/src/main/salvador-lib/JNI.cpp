@@ -13,7 +13,8 @@ extern "C"
     JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_drawFrame(JNIEnv *env, jobject);
 
     // Touch events
-    JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_handleTouchDrag(JNIEnv *env, jobject, jfloat x, jfloat y);
+    JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_handleDragEvent(JNIEnv *env, jobject,
+                                                                              jfloat x, jfloat y);
     JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_handleTouchUp(JNIEnv *env, jobject, jfloat x, jfloat y);
 };
 
@@ -32,9 +33,10 @@ JNIEXPORT void JNICALL Java_jp_volumerenderer_SalvadorLib_drawFrame(JNIEnv *env,
     SalvadorMain::getInstance()->runTick();
 }
 
-JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_handleTouchDrag(JNIEnv *env, jobject, jfloat x, jfloat y)
+JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_handleDragEvent(JNIEnv *env, jobject, jfloat x,
+                                                                  jfloat y)
 {
-    SalvadorMain::getInstance()->handleTouchDrag(x,y);
+    SalvadorMain::getInstance()->handleDragEvent(x, y);
 }
 
 void Java_jp_volumerenderer_SalvadorLib_handleTouchUp(JNIEnv *env, jobject, jfloat x, jfloat y)
