@@ -26,9 +26,6 @@ protected:
     // X, Y, Z
     std::array<float, 3> pos_;
 
-    // X: Pitch     Y: Yaw      Z: Roll
-    std::array<float, 3> orientation_;
-
     // Speed of movement around each axis in degrees per second
 
     // This quaternion represents a composite rotation transformation around the centre of the
@@ -55,7 +52,6 @@ public:
     virtual void update(float dt);
 
     virtual void setPos(float x, float y, float z);
-    virtual void setOrientation(float pitch, float yaw, float roll);
 
     // Input events
     virtual void handleTouchUp(float x, float y);

@@ -14,7 +14,6 @@ static float DRAGSPEED = 40.0f;
 Object::Object() : state_(State::STATIONARY), transformationUpdateRequired_(true)
 {
     pos_ = {0.0f, 0.0f, 0.0f};
-    orientation_ = {0.0f, 0.0f, 0.0f};
     quat_identity(rotation_);
     mat4x4_identity(transformationMatrix_);
 }
@@ -26,12 +25,6 @@ Object::~Object()
 void Object::setPos(float x, float y, float z)
 {
     pos_ = {x,y,z};
-    transformationUpdateRequired_ = true;
-}
-
-void Object::setOrientation(float pitch, float yaw, float roll)
-{
-    orientation_ = {pitch,yaw,roll};
     transformationUpdateRequired_ = true;
 }
 
