@@ -30,7 +30,14 @@ protected:
     std::array<float, 3> orientation_;
 
     // Speed of movement around each axis in degrees per second
-    std::array<float, 3> rotationalSpeed_ = {0.0f, 0.0f, 0.0f};
+
+    // This quaternion represents a composite rotation transformation around the centre of the
+    // object that will rotate it to match its current orientation.
+    quat rotation_;
+
+    // Current drag vector - The current direction in screen space along which this object is being
+    // dragged.
+    std::array<float, 3> dragVector_ = {0.0f, 0.0f, 0.0f};
 
     mat4x4 transformationMatrix_;
 
@@ -39,7 +46,7 @@ protected:
     virtual void updateTransformation();
 
     // Places object at the origin, upright and looking down the z-axis
-    virtual void reset();
+    virtual void placeAtOrigin();
 
 public:
     Object();
