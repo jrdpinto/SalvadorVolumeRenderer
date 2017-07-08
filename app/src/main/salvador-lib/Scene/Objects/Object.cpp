@@ -32,9 +32,6 @@ void Object::update(float dt)
 {
     if (state_ == State::MOVING)
     {
-        // Update object position/orientation
-        auto length = vec2_len(dragVector_.data());
-
         // Rotation around Y
         quat yRotation;
         vec3 yAxis = {0.0f, 1.0f, 0.0f};
