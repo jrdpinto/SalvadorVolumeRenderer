@@ -63,12 +63,13 @@ const Camera *Scene::getCamera() const
     return &pimpl_->cam_;
 }
 
-void Scene::addVolume()
-{
-
-}
-
 const Volume *Scene::getVolume() const
 {
     return &pimpl_->vol_;
+}
+
+void Scene::loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+                       unsigned short height, unsigned short depth)
+{
+    pimpl_->vol_.loadVolume(volBuffer, width, height, depth);
 }

@@ -3,8 +3,8 @@ package jp.volumerenderer;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.content.res.AssetManager;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
@@ -13,6 +13,10 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity
 {
     private GLSurfaceView glSurfaceView;
+
+    // Need to maintain a reference to the Asset manager to prevent the garbage collector from
+    // releasing it, after it is passed to the native library.
+    private AssetManager assetManager_;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -34,6 +38,9 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "This device does not support OpenGL ES 3.0.", Toast.LENGTH_LONG).show();
             return;
         }
+
+        assetManager_ = getResources().getAssets();
+        SalvadorLib.loadVolume("volume-data/lobster.dat", assetManager_);
     }
 
     @Override

@@ -11,6 +11,10 @@
 
 class Volume : public Object
 {
+    // Dimensions
+    unsigned short width_, height_, depth_;
+    std::shared_ptr<std::vector<float>> volBuffer_;
+
 public:
 
     struct Vertex
@@ -22,6 +26,9 @@ public:
 
     Volume();
     ~Volume() override;
+
+    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+                              unsigned short height, unsigned short depth);
 
     // Returns a pointer to an interleaved vertex buffer
     const std::vector<Volume::Vertex>* getGeometry() const;

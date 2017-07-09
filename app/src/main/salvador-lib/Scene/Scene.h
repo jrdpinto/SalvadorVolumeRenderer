@@ -18,6 +18,7 @@ class Scene
     class impl;
     std::unique_ptr<impl> pimpl_;
 
+
 public:
 
     Scene();
@@ -30,8 +31,8 @@ public:
     const Camera* getCamera() const;
     const Volume* getVolume() const;
 
-    // TODO: Flesh out this function with volume params/data
-    void addVolume();
+    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+                              unsigned short height, unsigned short depth);
 
     // Touch events
     void handleDragEvent(float x, float y);

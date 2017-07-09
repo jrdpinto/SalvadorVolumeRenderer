@@ -3,6 +3,9 @@
 //
 
 #include "Volume.h"
+#include "../../Logger/Logger.h"
+
+const std::string TAG_ = "Volume.cpp";
 
 // Quad arranged in triangle strip format.
 const std::vector<Volume::Vertex> QUAD = {{
@@ -14,6 +17,7 @@ const std::vector<Volume::Vertex> QUAD = {{
 
 Volume::Volume()
 {
+    volBuffer_ = nullptr;
 }
 
 Volume::~Volume()
@@ -24,4 +28,21 @@ Volume::~Volume()
 const std::vector<Volume::Vertex>* Volume::getGeometry() const
 {
     return &QUAD;
+}
+
+void initGeometry(unsigned short width, unsigned short height, unsigned short depth)
+{
+
+}
+
+void Volume::loadVolume(std::shared_ptr<std::vector<float>> volBuffer,
+                        unsigned short width, unsigned short height, unsigned short depth)
+{
+    if (!volBuffer->empty())
+    {
+        volBuffer_ = volBuffer;
+        width_ = width;
+        height_ = height;
+        depth_ = depth;
+    }
 }
