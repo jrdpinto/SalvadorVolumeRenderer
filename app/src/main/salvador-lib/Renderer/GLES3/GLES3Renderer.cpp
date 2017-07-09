@@ -20,8 +20,10 @@ static const char defaultVertexShader[] =
         "out vec4 vColour;\n"
         "void main()\n"
         "{\n"
-        "    //TODO: Transform gl_Position into screen space\n"
-        "    gl_Position = mvpMat*pos;\n"
+        "    // Need to convert the instance id to a float so that it can be multiplied by 'pos'\n"
+        "    float instance = float(gl_InstanceID);\n"
+        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+(-0.1*instance), pos.w);\n"
+        "    gl_Position = mvpMat*instancePos;\n"
         "    vColour = colour;\n"
         "}\n";
 
@@ -74,8 +76,6 @@ public:
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
             vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
-
-
         }
         else
         {
@@ -251,7 +251,8 @@ public:
             glEnableVertexAttribArray(vtxColHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
 
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei) scene->getVolume()->getGeometry()->size());
+            glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
+                                  (GLsizei) scene->getVolume()->getGeometry()->size(), 1);
 
             // Deactivate the VBO
             glBindBuffer(GL_ARRAY_BUFFER, 0);
