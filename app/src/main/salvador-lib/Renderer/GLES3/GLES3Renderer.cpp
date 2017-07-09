@@ -252,7 +252,8 @@ public:
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
 
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
-                                  (GLsizei) scene->getVolume()->getGeometry()->size(), 1);
+                                  (GLsizei) scene->getVolume()->getGeometry()->size(),
+                                  scene->getVolume()->getNumberOfCrossSections());
 
             // Deactivate the VBO
             glBindBuffer(GL_ARRAY_BUFFER, 0);

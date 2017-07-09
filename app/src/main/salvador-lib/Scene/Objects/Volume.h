@@ -11,12 +11,10 @@
 
 class Volume : public Object
 {
-    // Dimensions
-    unsigned short width_, height_, depth_;
-    std::shared_ptr<std::vector<float>> volBuffer_;
+    class impl_;
+    std::unique_ptr<impl_> pimpl_;
 
 public:
-
     struct Vertex
     {
         float pos_[3];
@@ -32,6 +30,9 @@ public:
 
     // Returns a pointer to an interleaved vertex buffer
     const std::vector<Volume::Vertex>* getGeometry() const;
+
+    // Return the number of vertical cross-sections that need to be rendered
+    const int getNumberOfCrossSections() const;
 };
 
 #endif //VOLUMERENDERER_VOLUME_H
