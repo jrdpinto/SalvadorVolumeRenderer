@@ -37,6 +37,7 @@ find_library( # Sets the name of the path variable.
               log )
 find_library(opengl-lib GLESv3)
 find_library(egl-lib EGL)
+find_library(android-lib android)
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
@@ -46,5 +47,6 @@ target_link_libraries( salvador-lib
                        # Links the target library to the libraries
                        # included in the NDK.
                        ${log-lib}
+                       ${android-lib}
                        ${opengl-lib}
                        ${egl-lib})
