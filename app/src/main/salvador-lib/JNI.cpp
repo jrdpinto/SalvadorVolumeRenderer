@@ -64,7 +64,7 @@ JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_loadVolume(JNIEnv *env, jobjec
     // TODO: Ideally this code would be part of an Android file manager!
     unsigned short width=0, height=0, depth=0, voxel=0;
     int size = 0;
-    std::shared_ptr<std::vector<float>> buffer;
+    std::shared_ptr<std::vector<unsigned char>> buffer;
     AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
 
     if (mgr != nullptr)
@@ -86,7 +86,7 @@ JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_loadVolume(JNIEnv *env, jobjec
 
             // Load volume data into a buffer
             Logger::logd(TAG_+" Loading data from file.");
-            buffer = std::make_shared<std::vector<float>>();
+            buffer = std::make_shared<std::vector<unsigned char>>();
             buffer->reserve(size);
             for (unsigned short z = 0; z < depth; ++z)
             {
@@ -95,7 +95,7 @@ JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_loadVolume(JNIEnv *env, jobjec
                     for (unsigned short x = 0; x < width; ++x)
                     {
                         AAsset_read(asset, &voxel, sizeof(unsigned short));
-                        buffer->push_back(float(voxel)/4096);
+                        buffer->push_back((unsigned char)((float)voxel/4096.0f)*255.0f);
                     }
                 }
             }

@@ -38,7 +38,7 @@ public:
     float scale_;
 
     // Holds the raw data loaded from the dataset.
-    std::shared_ptr<std::vector<float>> volBuffer_;
+    std::shared_ptr<std::vector<unsigned char>> volBuffer_;
 
     // The quad used to render a cross-section of the volume.
     std::vector<Volume::Vertex> geometry_;
@@ -67,7 +67,7 @@ public:
         numOfCrossSections_ = depth_;
     }
 
-    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+    void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
                               unsigned short height, unsigned short depth)
     {
         if (!volBuffer->empty())
@@ -82,9 +82,16 @@ public:
     }
 
     // Returns depth along the current axis
-    float getDepth()
+    float getDepthOnCurrentAxis()
     {
         return depth_*scale_;
+    }
+
+    void getDimensions(float& width, float& height, float& depth)
+    {
+        width = width_;
+        height = height_;
+        depth = depth_;
     }
 };
 
@@ -104,7 +111,7 @@ const std::vector<Volume::Vertex>* Volume::getGeometry() const
     return &pimpl_->geometry_;
 }
 
-void Volume::loadVolume(std::shared_ptr<std::vector<float>> volBuffer,
+void Volume::loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer,
                         unsigned short width, unsigned short height, unsigned short depth)
 {
     pimpl_->loadVolume(volBuffer, width, height, depth);
@@ -115,7 +122,17 @@ const int Volume::getNumberOfCrossSections() const
     return pimpl_->numOfCrossSections_;
 }
 
-const float Volume::getDepth() const
+const float Volume::getDepthOnCurrentAxis() const
 {
-    return pimpl_->getDepth();
+    return pimpl_->getDepthOnCurrentAxis();
+}
+
+void Volume::getDimensions(float &width, float &height, float &depth) const
+{
+    pimpl_->getDimensions(width, height, depth);
+}
+
+const std::shared_ptr<std::vector<unsigned char>> Volume::getTextureData() const
+{
+    return pimpl_->volBuffer_;
 }

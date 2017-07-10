@@ -80,7 +80,7 @@ void SalvadorMain::handleTouchUp(float x, float y)
     scene_.handleTouchUp(x,y);
 }
 
-void SalvadorMain::loadVolume(std::shared_ptr<std::vector<float>> volBuffer,
+void SalvadorMain::loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer,
                               unsigned short width,
                               unsigned short height, unsigned short depth)
 {

@@ -25,7 +25,7 @@ public:
     Volume();
     ~Volume() override;
 
-    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+    void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
                               unsigned short height, unsigned short depth);
 
     // Returns a pointer to an interleaved vertex buffer
@@ -35,7 +35,11 @@ public:
     const int getNumberOfCrossSections() const;
 
     // Returns the depth of the volume along the current axis
-    const float getDepth() const;
+    const float getDepthOnCurrentAxis() const;
+
+    void getDimensions(float& width, float& height, float& depth) const;
+
+    const std::shared_ptr<std::vector<unsigned char>> getTextureData() const;
 };
 
 #endif //VOLUMERENDERER_VOLUME_H

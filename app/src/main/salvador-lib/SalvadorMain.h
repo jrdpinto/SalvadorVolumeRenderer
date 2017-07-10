@@ -26,7 +26,7 @@ public:
 
     void handleTouchUp(float x, float y);
 
-    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+    void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
                     unsigned short height, unsigned short depth);
 
 private:

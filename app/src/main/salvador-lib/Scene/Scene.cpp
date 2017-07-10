@@ -68,7 +68,7 @@ const Volume *Scene::getVolume() const
     return &pimpl_->vol_;
 }
 
-void Scene::loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+void Scene::loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
                        unsigned short height, unsigned short depth)
 {
     pimpl_->vol_.loadVolume(volBuffer, width, height, depth);

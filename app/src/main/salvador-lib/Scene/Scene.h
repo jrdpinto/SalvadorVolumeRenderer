@@ -31,7 +31,7 @@ public:
     const Camera* getCamera() const;
     const Volume* getVolume() const;
 
-    void loadVolume(std::shared_ptr<std::vector<float>> volBuffer, unsigned short width,
+    void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
                               unsigned short height, unsigned short depth);
 
     // Touch events

@@ -49,12 +49,16 @@ public:
     const EGLContext eglContext_;
     const std::string TAG_ = "GLES3Renderer";
 
+    // Handles to the shader programs and its inputs
     GLuint defaultProgram_;
     GLuint vtxPosHandle_;
     GLuint vtxColHandle_;
     GLuint mVPMatrixHandle_;
     GLuint rangeHandle_;
     GLuint gradientHandle_;
+
+    // Handle to the 3d texture that is used to sample the volume
+    GLuint texId_;
 
     // Holds all active buffers
     GLuint buffers_[1];
@@ -207,9 +211,12 @@ public:
         Logger::logd(TAG_ + " Vendor: " + glEnumToString(GL_VENDOR));
         Logger::logd(TAG_ + " Renderer: " + glEnumToString(GL_RENDERER));
         Logger::logd(TAG_ + " Extensions: " + glEnumToString(GL_EXTENSIONS));
+        int maxTextureSize;
+        glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &maxTextureSize);
+        Logger::logd(TAG_ + " Max 3D texture size: " + std::to_string(maxTextureSize));
     }
 
-    // Initialises all required vertex buffers for objects in the scene
+    // Initialises all required buffers for the current volume
     void initBuffers(const Scene* scene)
     {
         if (!bufferInitialised)
@@ -218,12 +225,28 @@ public:
             if (vol != nullptr)
             {
                 // Initialise vertex buffer(s)
+                Logger::logd(TAG_+" Initialising vertex buffers.");
                 glGenBuffers(1, buffers_);
                 glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
                 // NOTE: 'usage' is currently 'STATIC' but will need to be 'DYNAMIC' when the renderer
                 // is modified to use dynamically created/clipped quads.
                 auto size = sizeof(Volume::Vertex) * vol->getGeometry()->size();
                 glBufferData(GL_ARRAY_BUFFER, size, &vol->getGeometry()->front(), GL_STATIC_DRAW);
+
+                // Initialise 3D texture
+                Logger::logd(TAG_+" Initialising 3D texture.");
+                glGenTextures(1, &texId_);
+                glBindTexture(GL_TEXTURE_3D, texId_);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                float width, height, depth;
+                vol->getDimensions(width, height, depth);
+                glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE, width, height, depth, 0, GL_LUMINANCE,
+                             GL_UNSIGNED_BYTE, &(vol->getTextureData()->front()));
+                glBindTexture(GL_TEXTURE_3D, 0);
 
                 bufferInitialised = true;
             }
@@ -256,7 +279,7 @@ public:
                                   (const GLvoid *) offsetof(Volume::Vertex, col_));
             glEnableVertexAttribArray(vtxColHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
-            glUniform1f(rangeHandle_, (scene->getVolume()->getDepth()/2.0f));
+            glUniform1f(rangeHandle_, (scene->getVolume()->getDepthOnCurrentAxis()/2.0f));
             glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
 
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
