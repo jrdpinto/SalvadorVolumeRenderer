@@ -33,6 +33,9 @@ public:
 
     // Return the number of vertical cross-sections that need to be rendered
     const int getNumberOfCrossSections() const;
+
+    // Returns the depth of the volume along the current axis
+    const float getDepth() const;
 };
 
 #endif //VOLUMERENDERER_VOLUME_H

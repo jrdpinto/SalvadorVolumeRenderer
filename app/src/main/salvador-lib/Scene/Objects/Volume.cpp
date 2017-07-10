@@ -33,9 +33,6 @@ public:
     // The number of vertical cross-sections, used to sample the volume at regular intervals.
     int numOfCrossSections_;
 
-    // The gap between each quad.
-    float spacing_;
-
     // Typical volume datasets are quite large. 'scale_' is used to shrink them down to a more
     // manageable size.
     float scale_;
@@ -46,7 +43,7 @@ public:
     // The quad used to render a cross-section of the volume.
     std::vector<Volume::Vertex> geometry_;
 
-    impl_() : width_(0), height_(0), depth_(0), scale_(0.1f), spacing_(0.1f), numOfCrossSections_(0.0f),
+    impl_() : width_(0), height_(0), depth_(0), scale_(0.1f), numOfCrossSections_(0.0f),
               volBuffer_(nullptr)
     {
     }
@@ -83,6 +80,12 @@ public:
             initGeometry();
         }
     }
+
+    // Returns depth along the current axis
+    float getDepth()
+    {
+        return depth_*scale_;
+    }
 };
 
 
@@ -110,4 +113,9 @@ void Volume::loadVolume(std::shared_ptr<std::vector<float>> volBuffer,
 const int Volume::getNumberOfCrossSections() const
 {
     return pimpl_->numOfCrossSections_;
+}
+
+const float Volume::getDepth() const
+{
+    return pimpl_->getDepth();
 }

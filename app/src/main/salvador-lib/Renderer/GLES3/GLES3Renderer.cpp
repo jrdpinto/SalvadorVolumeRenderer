@@ -8,21 +8,23 @@
 
 #include "GLES3Renderer.h"
 #include "../../Logger/Logger.h"
-#include "../../external/linmath/linmath.h"
 #include "../../math/MathExtensions.h"
-#include "../../Scene/Objects/Volume.h"
 
 static const char defaultVertexShader[] =
         "#version 300 es\n"
         "uniform mat4 mvpMat;\n"
+        "uniform float gradient;\n"
+        "uniform float range;\n"
         "in vec4 pos;\n"
         "in vec4 colour;\n"
         "out vec4 vColour;\n"
         "void main()\n"
         "{\n"
-        "    // Need to convert the instance id to a float so that it can be multiplied by 'pos'\n"
+        "    // Calculate the offset for the current vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
-        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+(-0.1*instance), pos.w);\n"
+        "    float offset = ((gradient*instance)-1.0)*range;\n"
+        "\n"
+        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offset, pos.w);\n"
         "    gl_Position = mvpMat*instancePos;\n"
         "    vColour = colour;\n"
         "}\n";
@@ -51,6 +53,8 @@ public:
     GLuint vtxPosHandle_;
     GLuint vtxColHandle_;
     GLuint mVPMatrixHandle_;
+    GLuint rangeHandle_;
+    GLuint gradientHandle_;
 
     // Holds all active buffers
     GLuint buffers_[1];
@@ -76,6 +80,8 @@ public:
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
             vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
+            rangeHandle_ = glGetUniformLocation(defaultProgram_, "range");
+            gradientHandle_ = glGetUniformLocation(defaultProgram_, "gradient");
         }
         else
         {
@@ -250,6 +256,8 @@ public:
                                   (const GLvoid *) offsetof(Volume::Vertex, col_));
             glEnableVertexAttribArray(vtxColHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
+            glUniform1f(rangeHandle_, (scene->getVolume()->getDepth()/2.0f));
+            glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
 
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
                                   (GLsizei) scene->getVolume()->getGeometry()->size(),
