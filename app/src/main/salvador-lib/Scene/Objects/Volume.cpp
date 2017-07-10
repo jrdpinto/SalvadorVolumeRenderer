@@ -7,23 +7,6 @@
 
 const std::string TAG_ = "Volume.cpp";
 
-// Quad arranged in triangle strip format.
-const std::vector<Volume::Vertex> TRIANGLE_STRIP_QUAD = {{
-    {{-1.0f,  -1.0f, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
-    {{ 1.0f,  -1.0f, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
-    {{-1.0f,   1.0f, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
-    {{ 1.0f,   1.0f, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
-}};
-
-const std::vector<Volume::Vertex> TRIANGLE_QUAD = {{
-    {{-1.0f,  -1.0f, -1.0f}, {0xff, 0x00, 0x00, 0xff}},
-    {{ 1.0f,  -1.0f, -1.0f}, {0x00, 0x00, 0xff, 0xff}},
-    {{-1.0f,   1.0f, -1.0f}, {0x00, 0x00, 0x00, 0xff}},
-    {{-1.0f,   1.0f, -1.0f}, {0x00, 0x00, 0x00, 0xff}},
-    {{ 1.0f,   1.0f, -1.0f}, {0x00, 0xff, 0x00, 0xff}},
-    {{ 1.0f,  -1.0f, -1.0f}, {0x00, 0x00, 0xff, 0xff}},
-}};
-
 class Volume::impl_
 {
 public:
@@ -59,10 +42,10 @@ public:
         float scaledWidth = (width_*scale_)/2.0f;
         float scaledHeight = (height_*scale_)/2.0f;
         geometry_ = {{
-                {{-scaledWidth, -scaledHeight, 0.0f}, {0xff, 0x00, 0x00, 0xff}},
-                {{ scaledWidth, -scaledHeight, 0.0f}, {0x00, 0x00, 0xff, 0xff}},
-                {{-scaledWidth,  scaledHeight, 0.0f}, {0x00, 0x00, 0x00, 0xff}},
-                {{ scaledWidth,  scaledHeight, 0.0f}, {0x00, 0xff, 0x00, 0xff}},
+                {{-scaledWidth, -scaledHeight, 0.0f}, {0.0f, 0.0f}},
+                {{ scaledWidth, -scaledHeight, 0.0f}, {1.0f, 0.0f}},
+                {{-scaledWidth,  scaledHeight, 0.0f}, {0.0f, 1.0f}},
+                {{ scaledWidth,  scaledHeight, 0.0f}, {1.0f, 1.0f}},
         }};
         numOfCrossSections_ = depth_;
     }

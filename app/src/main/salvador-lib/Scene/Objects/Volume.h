@@ -18,8 +18,7 @@ public:
     struct Vertex
     {
         float pos_[3];
-        unsigned char col_[4];
-        // TODO: Add u,v coordinates
+        float uv_[2];
     };
 
     Volume();

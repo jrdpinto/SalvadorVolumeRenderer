@@ -16,27 +16,34 @@ static const char defaultVertexShader[] =
         "uniform float gradient;\n"
         "uniform float range;\n"
         "in vec4 pos;\n"
-        "in vec4 colour;\n"
-        "out vec4 vColour;\n"
+        "in vec2 textureCoordUV;\n"
+        "out vec3 textureCoordUVW;\n"
         "void main()\n"
         "{\n"
         "    // Calculate the offset for the current vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
         "    float offset = ((gradient*instance)-1.0)*range;\n"
         "\n"
+        "    // Calculate the third component of the texture coordinate for this instance\n"
+        "    textureCoordUVW.xy = textureCoordUV;\n"
+        "    textureCoordUVW.z = 0.5;\n"
+        "\n"
         "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offset, pos.w);\n"
         "    gl_Position = mvpMat*instancePos;\n"
-        "    vColour = colour;\n"
         "}\n";
 
 static const char defaultFragmentShader[] =
         "#version 300 es\n"
         "precision mediump float;\n"
-        "in vec4 vColour;\n"
+        "precision lowp sampler3D;\n"
+        "uniform sampler3D volumeData;\n"
+        "in vec3 textureCoordUVW;\n"
         "out vec4 outColour;\n"
         "void main()\n"
         "{\n"
-        "    outColour = vColour;\n"
+        //"    outColour.xyz = textureCoordUVW;\n"
+        //"    outColour.w = 1.0;\n"
+        "   outColour = texture(volumeData, textureCoordUVW);"
         "}\n";
 
 static mat4x4 projection_matrix;
@@ -52,13 +59,16 @@ public:
     // Handles to the shader programs and its inputs
     GLuint defaultProgram_;
     GLuint vtxPosHandle_;
-    GLuint vtxColHandle_;
     GLuint mVPMatrixHandle_;
     GLuint rangeHandle_;
     GLuint gradientHandle_;
+    GLuint texCoordHandle_;
 
     // Handle to the 3d texture that is used to sample the volume
     GLuint texId_;
+
+    // Location of the volume texture within the fragment shader
+    GLuint volumeDataHandle_;
 
     // Holds all active buffers
     GLuint buffers_[1];
@@ -66,7 +76,8 @@ public:
     // Prevents rendering if a buffer has not been created for the current volume
     bool bufferInitialised = false;
 
-    impl() : eglContext_(eglGetCurrentContext()), vtxColHandle_(-1), vtxPosHandle_(-1), mVPMatrixHandle_(-1)
+    impl() : eglContext_(eglGetCurrentContext()),  vtxPosHandle_(-1), mVPMatrixHandle_(-1),
+             rangeHandle_(-1), gradientHandle_(-1), texCoordHandle_(-1), volumeDataHandle_(-1)
     {
         if (eglContext_ != NULL)
         {
@@ -82,10 +93,11 @@ public:
             Logger::logd(TAG_ + " Initialising default shaders.");
             defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
-            vtxColHandle_ = glGetAttribLocation(defaultProgram_, "colour");
+            texCoordHandle_ = glGetAttribLocation(defaultProgram_, "textureCoordUV");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
             rangeHandle_ = glGetUniformLocation(defaultProgram_, "range");
             gradientHandle_ = glGetUniformLocation(defaultProgram_, "gradient");
+            volumeDataHandle_ = glGetUniformLocation(defaultProgram_, "volume");
         }
         else
         {
@@ -101,6 +113,7 @@ public:
             glDeleteProgram(defaultProgram_);
             Logger::logd(TAG_+" Deleting buffers.");
             glDeleteBuffers(1, buffers_);
+            glDeleteTextures(1, &texId_);
         }
     }
 
@@ -140,10 +153,8 @@ public:
                 {
                     GLchar infoLog[infoLogLen];
                     glGetShaderInfoLog(shader, infoLogLen, NULL, infoLog);
-                    Logger::loge(TAG_ +
-                                 " Could not compile " +
-                                 (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") +
-                                 " shader.");
+                    Logger::loge(TAG_ + " Could not compile " +
+                    (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") + " shader.");
                     Logger::loge(TAG_ + " Info:\n" + infoLog);
                 }
 
@@ -270,14 +281,19 @@ public:
 
             glUseProgram(defaultProgram_);
 
+            glEnable(GL_TEXTURE_3D);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, texId_);
+            glUniform1i(volumeDataHandle_, GL_TEXTURE0);
+
             // Activate the VBO and send data to the shader
             glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
             glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
                                   (const GLvoid *) offsetof(Volume::Vertex, pos_));
             glEnableVertexAttribArray(vtxPosHandle_);
-            glVertexAttribPointer(vtxColHandle_, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Volume::Vertex),
-                                  (const GLvoid *) offsetof(Volume::Vertex, col_));
-            glEnableVertexAttribArray(vtxColHandle_);
+            glVertexAttribPointer(texCoordHandle_, 2, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
+                                  (const GLvoid *) offsetof(Volume::Vertex, uv_));
+            glEnableVertexAttribArray(texCoordHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
             glUniform1f(rangeHandle_, (scene->getVolume()->getDepthOnCurrentAxis()/2.0f));
             glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
@@ -286,8 +302,10 @@ public:
                                   (GLsizei) scene->getVolume()->getGeometry()->size(),
                                   scene->getVolume()->getNumberOfCrossSections());
 
-            // Deactivate the VBO
+            // Deactivate the VBO and texture unit
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
+            glDisable(GL_TEXTURE_3D);
         }
     }
 };
