@@ -95,7 +95,7 @@ JNIEXPORT void Java_jp_volumerenderer_SalvadorLib_loadVolume(JNIEnv *env, jobjec
                     for (unsigned short x = 0; x < width; ++x)
                     {
                         AAsset_read(asset, &voxel, sizeof(unsigned short));
-                        buffer->push_back((unsigned char)((float)voxel/4096.0f)*255.0f);
+                        buffer->push_back(((float)voxel/4096.0f)*255);
                     }
                 }
             }
