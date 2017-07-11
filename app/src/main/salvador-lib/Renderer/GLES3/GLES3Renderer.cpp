@@ -25,13 +25,16 @@ static const char defaultVertexShader[] =
         "{\n"
         "    // Calculate the offset for the current vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
-        "    float offsetZ = closestAxis.z*(((gradient*instance)-1.0)*range);\n"
+        "    float offset = ((gradient*instance)-1.0)*range;\n"
+        "    float offsetZ = closestAxis.z*offset;\n"
+        "    float offsetY = closestAxis.y*offset;\n"
+        "    float offsetX = closestAxis.x*offset;\n"
         "\n"
         "    // Calculate the third component of the texture coordinate for this instance\n"
         "    otextureCoordUVW = textureCoordUVW;\n"
         "    otextureCoordUVW.z = ((-(pos.z+offsetZ)+range)/(2.0*range));\n"
         "\n"
-        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offsetZ, pos.w);\n"
+        "    vec4 instancePos = vec4(pos.x+offsetX, pos.y+offsetY, pos.z+offsetZ, pos.w);\n"
         "    gl_Position = mvpMat*instancePos;\n"
         "}\n";
 
