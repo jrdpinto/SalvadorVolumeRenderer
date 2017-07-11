@@ -4,6 +4,8 @@
 
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
+#include <cmath>
+#include <array>
 #include <string>
 
 #include "GLES3Renderer.h"
@@ -15,6 +17,7 @@ static const char defaultVertexShader[] =
         "uniform mat4 mvpMat;\n"
         "uniform float gradient;\n"
         "uniform float range;\n"
+        "uniform vec3 closestAxis;\n"
         "in vec4 pos;\n"
         "in vec2 textureCoordUV;\n"
         "out vec3 textureCoordUVW;\n"
@@ -22,7 +25,7 @@ static const char defaultVertexShader[] =
         "{\n"
         "    // Calculate the offset for the current vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
-        "    float offset = ((gradient*instance)-1.0)*range;\n"
+        "    float offset = closestAxis.z*(((gradient*instance)-1.0)*range);\n"
         "\n"
         "    // Calculate the third component of the texture coordinate for this instance\n"
         "    textureCoordUVW.xy = textureCoordUV;\n"
@@ -62,6 +65,7 @@ public:
     GLuint rangeHandle_;
     GLuint gradientHandle_;
     GLuint texCoordHandle_;
+    GLuint closestAxis_;
 
     // Handle to the 3d texture that is used to sample the volume
     GLuint texId_;
@@ -76,7 +80,8 @@ public:
     bool bufferInitialised = false;
 
     impl() : eglContext_(eglGetCurrentContext()),  vtxPosHandle_(-1), mVPMatrixHandle_(-1),
-             rangeHandle_(-1), gradientHandle_(-1), texCoordHandle_(-1), volumeDataHandle_(-1)
+             rangeHandle_(-1), gradientHandle_(-1), texCoordHandle_(-1), volumeDataHandle_(-1),
+             closestAxis_(-1)
     {
         if (eglContext_ != NULL)
         {
@@ -97,6 +102,7 @@ public:
             rangeHandle_ = glGetUniformLocation(defaultProgram_, "range");
             gradientHandle_ = glGetUniformLocation(defaultProgram_, "gradient");
             volumeDataHandle_ = glGetUniformLocation(defaultProgram_, "volume");
+            closestAxis_ = glGetUniformLocation(defaultProgram_, "closestAxis");
         }
         else
         {
@@ -263,6 +269,42 @@ public:
         }
     }
 
+    // Returns a 3 element vector indicating the axis of the volume (x,y,z) that is closest to the
+    // camera. Negative values indicate that the camera is behind that particular axis.
+    void determineClosestAxis(const Scene *scene, mat4x4 *modelView, std::array<int,3>& direction)
+    {
+        // Determine where the camera lies in object space
+        vec4 cameraInModelSpace;
+        auto pos = *(scene->getCamera()->getPos());
+        vec4 cameraInWorldSpace = {pos[0], pos[1], pos[2], 1.0f};
+        mat4x4 inverseModelView;
+        mat4x4_invert(inverseModelView,(vec4*) modelView);
+        mat4x4_mul_vec4(cameraInModelSpace, inverseModelView, cameraInWorldSpace);
+
+        vec4 cameraPosNormalised;
+        vec4_norm(cameraPosNormalised, cameraInModelSpace);
+
+        // Compute angle between camera position and each axisNo
+        vec4 xAxis = {1.0f, 0.0f, 0.0f, 1.0f};
+        vec4 yAxis = {0.0f, 1.0f, 0.0f, 1.0f};
+        vec4 zAxis = {0.0f, 0.0f, 1.0f, 1.0f};
+
+        std::array<float,3> axisAngles;
+        axisAngles[0] = vec3_mul_inner(cameraPosNormalised, xAxis);
+        axisAngles[1] = vec3_mul_inner(cameraPosNormalised, yAxis);
+        axisAngles[2] = vec3_mul_inner(cameraPosNormalised, zAxis);
+
+        // Find the axis that the camera is closest to
+        auto closestAxis = std::max_element(axisAngles.begin(), axisAngles.end(),
+                                            [](float i, float j)->bool{
+                                                return abs(i) < abs(j);
+                                            });
+        int axisNo = closestAxis - axisAngles.begin();
+        direction = {axisNo == 0 ? (int)std::copysign(1,*closestAxis) : 0,
+                     axisNo == 1 ? (int)std::copysign(1,*closestAxis) : 0,
+                     axisNo == 2 ? (int)std::copysign(1,*closestAxis) : 0};
+    }
+
     void renderFrame(const Scene* scene)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -277,6 +319,9 @@ public:
 
             mat4x4 modelViewProjection_matrix;
             mat4x4_mul(modelViewProjection_matrix, projection_matrix, modelView_matrix);
+
+            std::array<int,3> closestAxis;
+            determineClosestAxis(scene, &modelView_matrix, closestAxis);
 
             glUseProgram(defaultProgram_);
 
@@ -297,6 +342,7 @@ public:
                                   (const GLvoid *) offsetof(Volume::Vertex, uv_));
             glEnableVertexAttribArray(texCoordHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
+            glUniform3f(closestAxis_, closestAxis[0], closestAxis[1], closestAxis[2]);
             glUniform1f(rangeHandle_, (scene->getVolume()->getDepthOnCurrentAxis()/2.0f));
             glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
 

@@ -52,6 +52,7 @@ public:
     virtual void update(float dt);
 
     virtual void setPos(float x, float y, float z);
+    virtual const std::array<float,3>* getPos() const;
 
     // Input events
     virtual void handleTouchUp(float x, float y);

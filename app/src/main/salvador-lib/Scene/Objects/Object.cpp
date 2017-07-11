@@ -109,3 +109,8 @@ void Object::handleDragEvent(float x, float y)
     dragVector_[1] = y;
     transformationUpdateRequired_ = true;
 }
+
+const std::array<float, 3>* Object::getPos() const
+{
+    return &pos_;
+}
