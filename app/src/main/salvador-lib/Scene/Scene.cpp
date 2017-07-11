@@ -18,7 +18,7 @@ public:
 
     impl()
     {
-        cam_.setPos(0.0f, 0.0f, 80.0f);
+        cam_.setPos(0.0f, 0.0f, 60.0f);
         cam_.setTarget(0.0f, 0.0f, -1.0f);
     }
 
