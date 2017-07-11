@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         assetManager_ = getResources().getAssets();
-        SalvadorLib.loadVolume("volume-data/lobster.dat", assetManager_);
+        SalvadorLib.loadVolume("volume-data/skewed_head.dat", assetManager_);
+        //SalvadorLib.loadVolume("volume-data/lobster.dat", assetManager_);
     }
 
     @Override
