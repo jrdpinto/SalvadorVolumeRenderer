@@ -35,8 +35,11 @@ public:
     // Return the number of vertical cross-sections that need to be rendered
     const int getNumberOfCrossSections() const;
 
-    // Returns the depth of the volume along the current axis
-    const float getDepthOnCurrentAxis() const;
+    // These functions return the range (-r to +r) within which cross-sections
+    // are rendered on each axis
+    const float& getRangeX() const;
+    const float& getRangeY() const;
+    const float& getRangeZ() const;
 
     void getDimensions(float& width, float& height, float& depth) const;
 

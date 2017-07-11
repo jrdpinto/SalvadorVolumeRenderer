@@ -16,25 +16,28 @@ static const char defaultVertexShader[] =
         "#version 300 es\n"
         "uniform mat4 mvpMat;\n"
         "uniform float gradient;\n"
-        "uniform float range;\n"
+        "uniform float rangeX;\n"
+        "uniform float rangeY;\n"
+        "uniform float rangeZ;\n"
         "uniform vec3 closestAxis;\n"
         "in vec4 pos;\n"
         "in vec3 textureCoordUVW;\n"
         "out vec3 otextureCoordUVW;\n"
         "void main()\n"
         "{\n"
-        "    // Calculate the offset for the current vertex using the instance id\n"
+        "    // Calculate the offset for this vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
-        "    float offset = ((gradient*instance)-1.0)*range;\n"
-        "    float offsetZ = closestAxis.z*offset;\n"
-        "    float offsetY = closestAxis.y*offset;\n"
-        "    float offsetX = closestAxis.x*offset;\n"
-        "\n"
-        "    // Calculate the third component of the texture coordinate for this instance\n"
-        "    otextureCoordUVW = textureCoordUVW;\n"
-        "    otextureCoordUVW.z = ((-(pos.z+offsetZ)+range)/(2.0*range));\n"
-        "\n"
+        "    float offset = ((gradient*instance)-1.0);\n"
+        "    float offsetZ = closestAxis.z*(offset*rangeZ);\n"
+        "    float offsetY = closestAxis.y*(offset*rangeY);\n"
+        "    float offsetX = closestAxis.x*(offset*rangeX);\n"
         "    vec4 instancePos = vec4(pos.x+offsetX, pos.y+offsetY, pos.z+offsetZ, pos.w);\n"
+        "\n"
+        "    // Calculate texture coordinates for this vertex based on its offset position\n"
+        "    otextureCoordUVW.x = ((instancePos.x+rangeX)/(2.0*rangeX));\n"
+        "    otextureCoordUVW.y = ((instancePos.y+rangeY)/(2.0*rangeY));\n"
+        "    otextureCoordUVW.z = ((-instancePos.z+rangeZ)/(2.0*rangeZ));\n"
+        "\n"
         "    gl_Position = mvpMat*instancePos;\n"
         "}\n";
 
@@ -65,7 +68,9 @@ public:
     GLuint defaultProgram_;
     GLuint vtxPosHandle_;
     GLuint mVPMatrixHandle_;
-    GLuint rangeHandle_;
+    GLuint rangeXHandle_;
+    GLuint rangeYHandle_;
+    GLuint rangeZHandle_;
     GLuint gradientHandle_;
     GLuint texCoordHandle_;
     GLuint closestAxis_;
@@ -83,8 +88,8 @@ public:
     bool bufferInitialised = false;
 
     impl() : eglContext_(eglGetCurrentContext()),  vtxPosHandle_(-1), mVPMatrixHandle_(-1),
-             rangeHandle_(-1), gradientHandle_(-1), texCoordHandle_(-1), volumeDataHandle_(-1),
-             closestAxis_(-1)
+             rangeZHandle_(-1), gradientHandle_(-1), texCoordHandle_(-1), volumeDataHandle_(-1),
+             closestAxis_(-1), rangeXHandle_(-1), rangeYHandle_(-1)
     {
         if (eglContext_ != NULL)
         {
@@ -102,7 +107,9 @@ public:
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
             texCoordHandle_ = glGetAttribLocation(defaultProgram_, "textureCoordUVW");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
-            rangeHandle_ = glGetUniformLocation(defaultProgram_, "range");
+            rangeXHandle_ = glGetUniformLocation(defaultProgram_, "rangeX");
+            rangeYHandle_ = glGetUniformLocation(defaultProgram_, "rangeY");
+            rangeZHandle_ = glGetUniformLocation(defaultProgram_, "rangeZ");
             gradientHandle_ = glGetUniformLocation(defaultProgram_, "gradient");
             volumeDataHandle_ = glGetUniformLocation(defaultProgram_, "volume");
             closestAxis_ = glGetUniformLocation(defaultProgram_, "closestAxis");
@@ -298,7 +305,7 @@ public:
         vec4 cameraPosNormalised;
         vec4_norm(cameraPosNormalised, cameraInModelSpace);
 
-        // Compute angle between camera position and each axisNo
+        // Compute angle between camera position and each axis
         vec4 xAxis = {1.0f, 0.0f, 0.0f, 1.0f};
         vec4 yAxis = {0.0f, 1.0f, 0.0f, 1.0f};
         vec4 zAxis = {0.0f, 0.0f, 1.0f, 1.0f};
@@ -360,7 +367,9 @@ public:
             glEnableVertexAttribArray(texCoordHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
             glUniform3f(closestAxis_, closestAxis[0], closestAxis[1], closestAxis[2]);
-            glUniform1f(rangeHandle_, (scene->getVolume()->getDepthOnCurrentAxis()/2.0f));
+            glUniform1f(rangeXHandle_, (scene->getVolume()->getRangeX()));
+            glUniform1f(rangeYHandle_, (scene->getVolume()->getRangeY()));
+            glUniform1f(rangeZHandle_, (scene->getVolume()->getRangeZ()));
             glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
 
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,

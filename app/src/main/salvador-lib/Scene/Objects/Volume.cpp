@@ -12,6 +12,7 @@ class Volume::impl_
 public:
     // Dimensions
     unsigned short width_, height_, depth_;
+    float rangeX_, rangeY_, rangeZ_;
 
     // The number of vertical cross-sections, used to sample the volume at regular intervals.
     int numOfCrossSections_;
@@ -28,7 +29,7 @@ public:
     std::vector<Volume::Vertex> yzGeometry_, xzGeometry_, xyGeometry_;
 
     impl_() : width_(0), height_(0), depth_(0), scale_(0.1f), numOfCrossSections_(0.0f),
-              volBuffer_(nullptr)
+              volBuffer_(nullptr), rangeX_(0.0f), rangeY_(0.0f), rangeZ_(0.0f)
     {
     }
 
@@ -38,28 +39,30 @@ public:
 
     void initGeometry()
     {
-        // Quad is drawn with its centre at the origin
-        float scaledWidth = (width_*scale_)/2.0f;
-        float scaledHeight = (height_*scale_)/2.0f;
-        float scaledDepth = (depth_*scale_)/2.0f;
+        // Quads are drawn with their centre at the origin
+        rangeX_ = (width_*scale_)/2.0f;
+        rangeY_ = (height_*scale_)/2.0f;
+        rangeZ_ = (depth_*scale_)/2.0f;
+
         xyGeometry_ = {{
-                {{-scaledWidth, -scaledHeight, 0.0f}, {0.0f, 0.0f, 0.0f}},
-                {{ scaledWidth, -scaledHeight, 0.0f}, {1.0f, 0.0f, 0.0f}},
-                {{-scaledWidth,  scaledHeight, 0.0f}, {0.0f, 1.0f, 0.0f}},
-                {{ scaledWidth,  scaledHeight, 0.0f}, {1.0f, 1.0f, 0.0f}},
+                {{-rangeX_, -rangeY_, 0.0f}, {0.0f, 0.0f, 0.0f}},
+                {{ rangeX_, -rangeY_, 0.0f}, {1.0f, 0.0f, 0.0f}},
+                {{-rangeX_,  rangeY_, 0.0f}, {0.0f, 1.0f, 0.0f}},
+                {{ rangeX_,  rangeY_, 0.0f}, {1.0f, 1.0f, 0.0f}},
         }};
         xzGeometry_ = {{
-                {{-scaledWidth, 0.0f,  scaledDepth}, {0.0f, 0.5f, 0.0f}},
-                {{ scaledWidth, 0.0f,  scaledDepth}, {1.0f, 0.5f, 0.0f}},
-                {{-scaledWidth, 0.0f, -scaledDepth}, {0.0f, 0.5f, 1.0f}},
-                {{ scaledWidth, 0.0f, -scaledDepth}, {1.0f, 0.5f, 1.0f}},
+                {{-rangeX_, 0.0f,  rangeZ_}, {0.0f, 0.5f, 0.0f}},
+                {{ rangeX_, 0.0f,  rangeZ_}, {1.0f, 0.5f, 0.0f}},
+                {{-rangeX_, 0.0f, -rangeZ_}, {0.0f, 0.5f, 1.0f}},
+                {{ rangeX_, 0.0f, -rangeZ_}, {1.0f, 0.5f, 1.0f}},
         }};
         yzGeometry_ = {{
-                {{0.0f, -scaledHeight,  scaledDepth}, {0.5f, 0.0f, 0.0f}},
-                {{0.0f, -scaledHeight, -scaledDepth}, {0.5f, 0.0f, 1.0f}},
-                {{0.0f,  scaledHeight,  scaledDepth}, {0.5f, 1.0f, 0.0f}},
-                {{0.0f,  scaledHeight, -scaledDepth}, {0.5f, 1.0f, 1.0f}},
+                {{0.0f, -rangeY_,  rangeZ_}, {0.5f, 0.0f, 0.0f}},
+                {{0.0f, -rangeY_, -rangeZ_}, {0.5f, 0.0f, 1.0f}},
+                {{0.0f,  rangeY_,  rangeZ_}, {0.5f, 1.0f, 0.0f}},
+                {{0.0f,  rangeY_, -rangeZ_}, {0.5f, 1.0f, 1.0f}},
         }};
+
         numOfCrossSections_ = depth_;
     }
 
@@ -75,12 +78,6 @@ public:
 
             initGeometry();
         }
-    }
-
-    // Returns depth along the current axis
-    float getDepthOnCurrentAxis()
-    {
-        return depth_*scale_;
     }
 
     void getDimensions(float& width, float& height, float& depth)
@@ -128,11 +125,6 @@ const int Volume::getNumberOfCrossSections() const
     return pimpl_->numOfCrossSections_;
 }
 
-const float Volume::getDepthOnCurrentAxis() const
-{
-    return pimpl_->getDepthOnCurrentAxis();
-}
-
 void Volume::getDimensions(float &width, float &height, float &depth) const
 {
     pimpl_->getDimensions(width, height, depth);
@@ -141,4 +133,19 @@ void Volume::getDimensions(float &width, float &height, float &depth) const
 const std::shared_ptr<std::vector<unsigned char>> Volume::getTextureData() const
 {
     return pimpl_->volBuffer_;
+}
+
+const float &Volume::getRangeX() const
+{
+    return pimpl_->rangeX_;
+}
+
+const float &Volume::getRangeY() const
+{
+    return pimpl_->rangeY_;
+}
+
+const float &Volume::getRangeZ() const
+{
+    return pimpl_->rangeZ_;
 }
