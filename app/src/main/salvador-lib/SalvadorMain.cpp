@@ -12,7 +12,7 @@
 #include "external/linmath/linmath.h"
 
 // Drag vectors with a magnitude lower than this threshold are ignored
-static float TOUCH_EVENT_DRAG_THRESHOLD = 0.01f;
+static float TOUCH_EVENT_DRAG_THRESHOLD = 0.005f;
 
 SalvadorMain::SalvadorMain() : renderer_(nullptr)
 {

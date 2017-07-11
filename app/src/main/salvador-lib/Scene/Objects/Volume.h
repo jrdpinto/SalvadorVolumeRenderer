@@ -44,6 +44,10 @@ public:
     void getDimensions(float& width, float& height, float& depth) const;
 
     const std::shared_ptr<std::vector<unsigned char>> getTextureData() const;
+
+    // Touch events
+    virtual void handleDragEvent(float x, float y);
+    virtual void handleTouchUp(float x, float y);
 };
 
 #endif //VOLUMERENDERER_VOLUME_H

@@ -15,7 +15,7 @@ public:
     float rangeX_, rangeY_, rangeZ_;
 
     // The number of vertical cross-sections, used to sample the volume at regular intervals.
-    int numOfCrossSections_;
+    int numOfCrossSections_, maxCrossSections_, minCrossSections_;
 
     // Typical volume datasets are quite large. 'scale_' is used to shrink them down to a more
     // manageable size.
@@ -29,7 +29,8 @@ public:
     std::vector<Volume::Vertex> yzGeometry_, xzGeometry_, xyGeometry_;
 
     impl_() : width_(0), height_(0), depth_(0), scale_(0.1f), numOfCrossSections_(0.0f),
-              volBuffer_(nullptr), rangeX_(0.0f), rangeY_(0.0f), rangeZ_(0.0f)
+              volBuffer_(nullptr), rangeX_(0.0f), rangeY_(0.0f), rangeZ_(0.0f), maxCrossSections_(0),
+              minCrossSections_(0)
     {
     }
 
@@ -63,7 +64,9 @@ public:
                 {{0.0f,  rangeY_, -rangeZ_}, {0.5f, 1.0f, 1.0f}},
         }};
 
-        numOfCrossSections_ = std::max({height_, width_, depth_});
+        maxCrossSections_ = std::max({height_, width_, depth_});
+        minCrossSections_ = (int)(maxCrossSections_*0.20f);
+        numOfCrossSections_ = maxCrossSections_;
     }
 
     void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
@@ -148,4 +151,17 @@ const float &Volume::getRangeY() const
 const float &Volume::getRangeZ() const
 {
     return pimpl_->rangeZ_;
+}
+
+void Volume::handleDragEvent(float x, float y)
+{
+    Object::handleDragEvent(x, y);
+    // Reduce geometry while moving to improve performance
+    pimpl_->numOfCrossSections_ = pimpl_->minCrossSections_;
+}
+
+void Volume::handleTouchUp(float x, float y)
+{
+    Object::handleTouchUp(x, y);
+    pimpl_->numOfCrossSections_ = pimpl_->maxCrossSections_;
 }
