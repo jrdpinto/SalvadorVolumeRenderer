@@ -63,7 +63,7 @@ public:
                 {{0.0f,  rangeY_, -rangeZ_}, {0.5f, 1.0f, 1.0f}},
         }};
 
-        numOfCrossSections_ = depth_;
+        numOfCrossSections_ = std::max({height_, width_, depth_});
     }
 
     void loadVolume(std::shared_ptr<std::vector<unsigned char>> volBuffer, unsigned short width,
