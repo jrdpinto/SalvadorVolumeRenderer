@@ -18,7 +18,7 @@ public:
     struct Vertex
     {
         float pos_[3];
-        float uv_[2];
+        float uvw_[3];
     };
 
     Volume();
@@ -28,7 +28,9 @@ public:
                               unsigned short height, unsigned short depth);
 
     // Returns a pointer to an interleaved vertex buffer
-    const std::vector<Volume::Vertex>* getGeometry() const;
+    const std::vector<Volume::Vertex>* getXYGeometry() const;
+    const std::vector<Volume::Vertex>* getXZGeometry() const;
+    const std::vector<Volume::Vertex>* getYZGeometry() const;
 
     // Return the number of vertical cross-sections that need to be rendered
     const int getNumberOfCrossSections() const;
