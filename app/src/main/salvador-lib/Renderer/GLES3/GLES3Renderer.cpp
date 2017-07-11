@@ -26,7 +26,7 @@ static const char defaultVertexShader[] =
         "\n"
         "    // Calculate the third component of the texture coordinate for this instance\n"
         "    textureCoordUVW.xy = textureCoordUV;\n"
-        "    textureCoordUVW.z = 0.5;\n"
+        "    textureCoordUVW.z = ((-(pos.z+offset)+range)/(2.0*range));\n"
         "\n"
         "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offset, pos.w);\n"
         "    gl_Position = mvpMat*instancePos;\n"
@@ -41,9 +41,8 @@ static const char defaultFragmentShader[] =
         "out vec4 outColour;\n"
         "void main()\n"
         "{\n"
-        //"    outColour.xyz = textureCoordUVW;\n"
-        //"    outColour.w = 1.0;\n"
         "   outColour = texture(volumeData, textureCoordUVW);"
+        "   outColour.w = outColour.x;"
         "}\n";
 
 static mat4x4 projection_matrix;
@@ -281,7 +280,10 @@ public:
 
             glUseProgram(defaultProgram_);
 
-            glEnable(GL_TEXTURE_3D);
+            glEnable(GL_BLEND);// Turn Blending On
+            glDisable(GL_DEPTH_TEST);// Turn Depth Testing Off
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA); //Blending function - 'Over'
+
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_3D, texId_);
             glUniform1i(volumeDataHandle_, GL_TEXTURE0);
@@ -305,7 +307,9 @@ public:
             // Deactivate the VBO and texture unit
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindTexture(GL_TEXTURE_3D, 0);
-            glDisable(GL_TEXTURE_3D);
+
+            glDisable(GL_BLEND);// Turn Blending Off
+            glEnable(GL_DEPTH_TEST);// Turn Depth Testing On
         }
     }
 };
