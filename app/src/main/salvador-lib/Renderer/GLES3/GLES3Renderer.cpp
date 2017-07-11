@@ -19,19 +19,19 @@ static const char defaultVertexShader[] =
         "uniform float range;\n"
         "uniform vec3 closestAxis;\n"
         "in vec4 pos;\n"
-        "in vec2 textureCoordUV;\n"
-        "out vec3 textureCoordUVW;\n"
+        "in vec3 textureCoordUVW;\n"
+        "out vec3 otextureCoordUVW;\n"
         "void main()\n"
         "{\n"
         "    // Calculate the offset for the current vertex using the instance id\n"
         "    float instance = float(gl_InstanceID);\n"
-        "    float offset = closestAxis.z*(((gradient*instance)-1.0)*range);\n"
+        "    float offsetZ = closestAxis.z*(((gradient*instance)-1.0)*range);\n"
         "\n"
         "    // Calculate the third component of the texture coordinate for this instance\n"
-        "    textureCoordUVW.xy = textureCoordUV;\n"
-        "    textureCoordUVW.z = ((-(pos.z+offset)+range)/(2.0*range));\n"
+        "    otextureCoordUVW = textureCoordUVW;\n"
+        "    otextureCoordUVW.z = ((-(pos.z+offsetZ)+range)/(2.0*range));\n"
         "\n"
-        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offset, pos.w);\n"
+        "    vec4 instancePos = vec4(pos.x, pos.y, pos.z+offsetZ, pos.w);\n"
         "    gl_Position = mvpMat*instancePos;\n"
         "}\n";
 
@@ -40,11 +40,11 @@ static const char defaultFragmentShader[] =
         "precision mediump float;\n"
         "precision lowp sampler3D;\n"
         "uniform sampler3D volumeData;\n"
-        "in vec3 textureCoordUVW;\n"
+        "in vec3 otextureCoordUVW;\n"
         "out vec4 outColour;\n"
         "void main()\n"
         "{\n"
-        "   outColour = texture(volumeData, textureCoordUVW);"
+        "   outColour = texture(volumeData, otextureCoordUVW);"
         "   outColour.w = outColour.x;"
         "}\n";
 
@@ -74,7 +74,7 @@ public:
     GLuint volumeDataHandle_;
 
     // Holds all active buffers
-    GLuint buffers_[1];
+    GLuint buffers_[3];
 
     // Prevents rendering if a buffer has not been created for the current volume
     bool bufferInitialised = false;
@@ -97,7 +97,7 @@ public:
             Logger::logd(TAG_ + " Initialising default shaders.");
             defaultProgram_ = createProgram(defaultVertexShader, defaultFragmentShader);
             vtxPosHandle_ = glGetAttribLocation(defaultProgram_, "pos");
-            texCoordHandle_ = glGetAttribLocation(defaultProgram_, "textureCoordUV");
+            texCoordHandle_ = glGetAttribLocation(defaultProgram_, "textureCoordUVW");
             mVPMatrixHandle_ = glGetUniformLocation(defaultProgram_, "mvpMat");
             rangeHandle_ = glGetUniformLocation(defaultProgram_, "range");
             gradientHandle_ = glGetUniformLocation(defaultProgram_, "gradient");
@@ -117,7 +117,7 @@ public:
             // Free all resources
             glDeleteProgram(defaultProgram_);
             Logger::logd(TAG_+" Deleting buffers.");
-            glDeleteBuffers(1, buffers_);
+            glDeleteBuffers(3, buffers_);
             glDeleteTextures(1, &texId_);
         }
     }
@@ -242,12 +242,21 @@ public:
             {
                 // Initialise vertex buffer(s)
                 Logger::logd(TAG_+" Initialising vertex buffers.");
-                glGenBuffers(1, buffers_);
-                glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+                glGenBuffers(3, buffers_);
+
+                glBindBuffer(GL_ARRAY_BUFFER, buffers_[2]);
                 // NOTE: 'usage' is currently 'STATIC' but will need to be 'DYNAMIC' when the renderer
                 // is modified to use dynamically created/clipped quads.
-                auto size = sizeof(Volume::Vertex) * vol->getGeometry()->size();
-                glBufferData(GL_ARRAY_BUFFER, size, &vol->getGeometry()->front(), GL_STATIC_DRAW);
+                auto size = sizeof(Volume::Vertex) * vol->getXYGeometry()->size();
+                glBufferData(GL_ARRAY_BUFFER, size, &vol->getXYGeometry()->front(), GL_STATIC_DRAW);
+
+                glBindBuffer(GL_ARRAY_BUFFER, buffers_[1]);
+                size = sizeof(Volume::Vertex) * vol->getXZGeometry()->size();
+                glBufferData(GL_ARRAY_BUFFER, size, &vol->getXZGeometry()->front(), GL_STATIC_DRAW);
+
+                glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+                size = sizeof(Volume::Vertex) * vol->getYZGeometry()->size();
+                glBufferData(GL_ARRAY_BUFFER, size, &vol->getYZGeometry()->front(), GL_STATIC_DRAW);
 
                 // Initialise 3D texture
                 Logger::logd(TAG_+" Initialising 3D texture.");
@@ -271,7 +280,9 @@ public:
 
     // Returns a 3 element vector indicating the axis of the volume (x,y,z) that is closest to the
     // camera. Negative values indicate that the camera is behind that particular axis.
-    void determineClosestAxis(const Scene *scene, mat4x4 *modelView, std::array<int,3>& direction)
+    // Also returns an integer corresponding to a vertex buffer. This buffer contains the quad
+    // that is used to render geometry along the closest axis.
+    int determineClosestAxis(const Scene *scene, mat4x4 *modelView, std::array<int,3>& direction)
     {
         // Determine where the camera lies in object space
         vec4 cameraInModelSpace;
@@ -303,6 +314,8 @@ public:
         direction = {axisNo == 0 ? (int)std::copysign(1,*closestAxis) : 0,
                      axisNo == 1 ? (int)std::copysign(1,*closestAxis) : 0,
                      axisNo == 2 ? (int)std::copysign(1,*closestAxis) : 0};
+
+        return axisNo;
     }
 
     void renderFrame(const Scene* scene)
@@ -321,7 +334,7 @@ public:
             mat4x4_mul(modelViewProjection_matrix, projection_matrix, modelView_matrix);
 
             std::array<int,3> closestAxis;
-            determineClosestAxis(scene, &modelView_matrix, closestAxis);
+            int bufferNo = determineClosestAxis(scene, &modelView_matrix, closestAxis);
 
             glUseProgram(defaultProgram_);
 
@@ -333,13 +346,14 @@ public:
             glBindTexture(GL_TEXTURE_3D, texId_);
             glUniform1i(volumeDataHandle_, GL_TEXTURE0);
 
-            // Activate the VBO and send data to the shader
-            glBindBuffer(GL_ARRAY_BUFFER, buffers_[0]);
+            // Activate the appropriate VBO and send data to the shader
+            glBindBuffer(GL_ARRAY_BUFFER, buffers_[bufferNo]);
+
             glVertexAttribPointer(vtxPosHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
                                   (const GLvoid *) offsetof(Volume::Vertex, pos_));
             glEnableVertexAttribArray(vtxPosHandle_);
-            glVertexAttribPointer(texCoordHandle_, 2, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
-                                  (const GLvoid *) offsetof(Volume::Vertex, uv_));
+            glVertexAttribPointer(texCoordHandle_, 3, GL_FLOAT, GL_FALSE, sizeof(Volume::Vertex),
+                                  (const GLvoid *) offsetof(Volume::Vertex, uvw_));
             glEnableVertexAttribArray(texCoordHandle_);
             glUniformMatrix4fv(mVPMatrixHandle_, 1, GL_FALSE, *modelViewProjection_matrix);
             glUniform3f(closestAxis_, closestAxis[0], closestAxis[1], closestAxis[2]);
@@ -347,7 +361,7 @@ public:
             glUniform1f(gradientHandle_, (2.0f/(float)scene->getVolume()->getNumberOfCrossSections()));
 
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
-                                  (GLsizei) scene->getVolume()->getGeometry()->size(),
+                                  (GLsizei) scene->getVolume()->getXYGeometry()->size(),
                                   scene->getVolume()->getNumberOfCrossSections());
 
             // Deactivate the VBO and texture unit
