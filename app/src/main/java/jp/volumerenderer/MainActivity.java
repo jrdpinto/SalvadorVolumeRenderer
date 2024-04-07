@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity
         if (configurationInfo.reqGlEsVersion >= 0x30000 )
         {
             glSurfaceView = new GLESSurface(this);
+            glSurfaceView.setPreserveEGLContextOnPause(true);
             setContentView(glSurfaceView);
         }
         else
